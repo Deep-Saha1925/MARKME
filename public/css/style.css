@@ -173,3 +173,85 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
 .scan-time    { font-size: 12px; color: #73726c; }
 
 .text-muted { color: #73726c; font-size: 14px; margin-bottom: 16px; }
+
+/* ── Scanner ── */
+.qr-reader {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: #1a1a18;
+  min-height: 280px;
+}
+
+.scan-status {
+  font-size: 14px;
+  min-height: 22px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  padding: 0 2px;
+}
+.scan-status.info  { color: #185FA5; }
+.scan-status.error {
+  color: #791F1F;
+  background: #FCEBEB;
+  padding: 10px 14px;
+  border: 1px solid #f09595;
+}
+
+.btn-ghost-full {
+  background: none;
+  border: 1px solid #d3d1c7;
+  color: #3d3d3a;
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+.btn-ghost-full:hover { background: #f4f4f0; }
+
+/* ── Success screen ── */
+.success-icon {
+  width: 64px; height: 64px;
+  background: #E1F5EE;
+  color: #0F6E56;
+  border-radius: 50%;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+/* ── History ── */
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0dfd8;
+  gap: 12px;
+}
+.history-row:last-child { border-bottom: none; }
+.history-course { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.history-detail { font-size: 12px; color: #73726c; margin-bottom: 6px; }
+
+.progress-bar-bg {
+  background: #e0dfd8;
+  border-radius: 4px;
+  height: 5px;
+  width: 200px;
+}
+.progress-bar-fill {
+  height: 5px;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.pct-badge {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}

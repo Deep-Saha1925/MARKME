@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkMe — Scan Attendance</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <!-- QR scanner library -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MarkMe</span>
+    </div>
+    <div class="nav-right">
+      <span id="student-name" class="nav-user"></span>
+      <button class="btn-ghost" onclick="logout()">Sign out</button>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width: 520px;">
+
+    <!-- Scanner card -->
+    <div class="card" id="scanner-card">
+      <h2>Scan QR code</h2>
+      <p class="text-muted">Point your camera at the QR code on the projector</p>
+
+      <div id="qr-reader" class="qr-reader"></div>
+      <div id="scan-status" class="scan-status"></div>
+
+      <button id="start-btn" onclick="startScanner()">Start camera</button>
+      <button id="stop-btn"  onclick="stopScanner()" class="hidden btn-ghost-full">Stop camera</button>
+    </div>
+
+    <!-- Success card (hidden until scan) -->
+    <div class="card hidden" id="success-card">
+      <div class="success-icon">✓</div>
+      <h2 style="text-align:center">Attendance marked!</h2>
+      <p class="text-muted" style="text-align:center" id="success-course"></p>
+      <p class="text-muted" style="text-align:center" id="success-time"></p>
+      <button onclick="scanAgain()" style="margin-top:8px">Scan another class</button>
+    </div>
+
+    <!-- Attendance history card -->
+    <div class="card" id="history-card">
+      <h2>My attendance</h2>
+      <div id="history-list">
+        <p class="text-muted">Loading...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../js/scanner.js"></script>
+</body>
+</html>
