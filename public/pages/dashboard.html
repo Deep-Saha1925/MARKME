@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkMe — Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Top navbar -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MarkMe</span>
+    </div>
+    <div class="nav-right">
+      <span id="teacher-name" class="nav-user"></span>
+      <button class="btn-ghost" onclick="logout()">Sign out</button>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- Generate QR section -->
+    <section class="card">
+      <h2>Start a session</h2>
+      <p class="text-muted">Select a course to generate a QR code for today's class</p>
+
+      <div class="form-row">
+        <div class="field">
+          <label for="course-select">Course</label>
+          <select id="course-select">
+            <option value="">Loading courses...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="expiry">QR expiry</label>
+          <select id="expiry">
+            <option value="5">5 minutes</option>
+            <option value="10" selected>10 minutes</option>
+            <option value="15">15 minutes</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="geo-status" class="geo-status"></div>
+
+      <button id="generate-btn" onclick="generateQR()">
+        Generate QR code
+      </button>
+    </section>
+
+    <!-- QR display section (hidden until generated) -->
+    <section class="card hidden" id="qr-section">
+      <div class="qr-layout">
+
+        <div class="qr-left">
+          <h2 id="qr-course-name"></h2>
+          <p class="text-muted">Show this on the projector. Students scan to mark attendance.</p>
+          <img id="qr-image" src="" alt="QR code" class="qr-img">
+          <div id="timer" class="timer"></div>
+          <button class="btn-danger" onclick="closeSession()">Close session</button>
+        </div>
+
+        <div class="qr-right">
+          <div class="attendance-header">
+            <h3>Live attendance</h3>
+            <span id="present-count" class="badge-count">0 present</span>
+          </div>
+          <div id="attendance-list" class="attendance-list">
+            <p class="text-muted">Waiting for scans...</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

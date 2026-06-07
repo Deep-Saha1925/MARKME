@@ -112,3 +112,64 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
 }
 
 .hidden { display: none; }
+
+/* ── Layout ── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  background: #fff;
+  border-bottom: 1px solid #e0dfd8;
+}
+.nav-right  { display: flex; align-items: center; gap: 16px; }
+.nav-user   { font-size: 14px; color: #73726c; }
+.btn-ghost  { background: none; border: 1px solid #d3d1c7; color: #3d3d3a;
+              width: auto; padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+.btn-ghost:hover { background: #f4f4f0; }
+.btn-danger { background: #A32D2D; margin-top: 14px; }
+.btn-danger:hover { background: #791F1F; }
+
+.container { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
+
+.card { background: #fff; border: 1px solid #e0dfd8; border-radius: 14px;
+        padding: 28px 32px; margin-bottom: 24px; }
+.card h2 { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+
+.form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.form-row .field { flex: 1; min-width: 180px; }
+
+/* ── Geo status ── */
+.geo-status { font-size: 13px; margin-bottom: 16px; color: #73726c; }
+.geo-ok   { color: #0F6E56; }
+.geo-warn { color: #854F0B; }
+
+/* ── QR layout ── */
+.qr-layout { display: flex; gap: 32px; flex-wrap: wrap; }
+.qr-left  { display: flex; flex-direction: column; align-items: center;
+             min-width: 260px; flex: 1; }
+.qr-right { flex: 2; min-width: 260px; }
+.qr-img   { width: 240px; height: 240px; border-radius: 12px;
+             border: 1px solid #e0dfd8; margin: 16px 0; }
+
+/* ── Timer ── */
+.timer         { font-size: 15px; font-weight: 500; color: #0F6E56; }
+.timer-urgent  { color: #854F0B; }
+.timer-expired { color: #A32D2D; }
+
+/* ── Live attendance ── */
+.attendance-header { display: flex; align-items: center;
+                     justify-content: space-between; margin-bottom: 14px; }
+.attendance-header h3 { font-size: 16px; font-weight: 500; }
+.badge-count { background: #E1F5EE; color: #0F6E56; font-size: 13px;
+               font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+.attendance-list { display: flex; flex-direction: column; gap: 8px;
+                   max-height: 340px; overflow-y: auto; }
+.attendance-row  { display: flex; justify-content: space-between; align-items: center;
+                   padding: 10px 14px; background: #fafaf8;
+                   border: 1px solid #e0dfd8; border-radius: 8px; }
+.roll-no      { font-size: 12px; color: #73726c; margin-right: 8px; }
+.student-name { font-size: 14px; font-weight: 500; }
+.scan-time    { font-size: 12px; color: #73726c; }
+
+.text-muted { color: #73726c; font-size: 14px; margin-bottom: 16px; }

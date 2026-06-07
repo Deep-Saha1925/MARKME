@@ -3,7 +3,7 @@ const qrcode = require('qrcode');
 const crypto = require('crypto');
 const sql = require('../db');
 const redis = require('../redis');
-const authMiddleware = require('../middleware/auth');
+const authMiddleware = require('../middlewares/auth.js');
 require('dotenv').config();
 
 const router = express.Router();
