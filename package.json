@@ -1,0 +1,21 @@
+{
+  "name": "markme",
+  "version": "1.0.0",
+  "description": "A QR-based attendance system for colleges. Teachers generate a QR code at the start of each class, students scan it on their phones to mark attendance — no paper, no proxies.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Deep-Saha1925/MARKME.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Deep-Saha1925/MARKME/issues"
+  },
+  "homepage": "https://github.com/Deep-Saha1925/MARKME#readme"
+}
