@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkMe — Student Signup</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-card" style="max-width: 460px;">
+
+    <div class="auth-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MarkMe</span>
+    </div>
+    <p class="auth-sub">Create your student account</p>
+
+    <!-- Step indicators -->
+    <div class="steps">
+      <div class="step active" id="step-dot-1">
+        <div class="step-circle">1</div>
+        <span>Verify roll no</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step-dot-2">
+        <div class="step-circle">2</div>
+        <span>Set password</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step-dot-3">
+        <div class="step-circle">3</div>
+        <span>Done</span>
+      </div>
+    </div>
+
+    <div id="error-msg"   class="error-box   hidden"></div>
+    <div id="success-msg" class="success-box hidden"></div>
+
+    <!-- ── Step 1: Roll number + email ── -->
+    <div id="step-1">
+      <div class="field">
+        <label for="roll-no">Roll number</label>
+        <input
+          type="text"
+          id="roll-no"
+          placeholder="e.g. 22CS045"
+          autocomplete="off"
+          oninput="this.value = this.value.toUpperCase()"
+        >
+        <span class="field-hint">Enter the roll number given by your college</span>
+      </div>
+
+      <div class="field">
+        <label for="email">College email</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="you@college.edu"
+          autocomplete="email"
+        >
+        <span class="field-hint">Must match the email registered by your admin</span>
+      </div>
+
+      <button id="verify-btn" onclick="verifyRollNo()">Verify & continue</button>
+
+      <a href="login.html" class="btn-outline" style="margin-top:10px">
+        Back to login
+      </a>
+    </div>
+
+    <!-- ── Step 2: Set password (hidden until step 1 passes) ── -->
+    <div id="step-2" class="hidden">
+
+      <!-- Student info banner -->
+      <div class="student-banner" id="student-banner"></div>
+
+      <div class="field">
+        <label for="new-password">Set a password</label>
+        <input
+          type="password"
+          id="new-password"
+          placeholder="Min. 8 characters"
+          oninput="checkStrength(this.value)"
+        >
+      </div>
+
+      <!-- Password strength bar -->
+      <div class="strength-bar-bg">
+        <div id="strength-bar" class="strength-bar"></div>
+      </div>
+      <div id="strength-label" class="strength-label"></div>
+
+      <div class="field" style="margin-top:14px">
+        <label for="confirm-password">Confirm password</label>
+        <input
+          type="password"
+          id="confirm-password"
+          placeholder="••••••••"
+        >
+      </div>
+
+      <!-- Password rules -->
+      <ul class="password-rules">
+        <li id="rule-length">At least 8 characters</li>
+        <li id="rule-number">Contains a number</li>
+        <li id="rule-special">Contains a special character</li>
+      </ul>
+
+      <button id="signup-btn" onclick="handleSignup()">Create account</button>
+
+      <button
+        class="btn-outline"
+        style="margin-top:10px"
+        onclick="goBackToStep1()"
+      >Back</button>
+
+    </div>
+
+    <!-- ── Step 3: Success (hidden until done) ── -->
+    <div id="step-3" class="hidden" style="text-align:center">
+      <div class="success-icon" style="margin: 20px auto 16px">✓</div>
+      <h2 style="margin-bottom:8px">Account created!</h2>
+      <p class="text-muted" id="welcome-msg"></p>
+      <button onclick="window.location.href='login.html'" style="margin-top:20px">
+        Go to login
+      </button>
+    </div>
+
+  </div>
+
+  <script src="../js/signup.js"></script>
+</body>
+</html>

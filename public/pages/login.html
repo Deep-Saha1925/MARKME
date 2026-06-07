@@ -9,6 +9,7 @@
 <body class="auth-page">
 
   <div class="auth-card">
+
     <div class="auth-logo">
       <span class="logo-mark">M</span>
       <span class="logo-text">MarkMe</span>
@@ -16,6 +17,7 @@
     <p class="auth-sub">Attendance made simple</p>
 
     <div id="error-msg" class="error-box hidden"></div>
+    <div id="success-msg" class="success-box hidden"></div>
 
     <div class="field">
       <label for="email">Email</label>
@@ -30,13 +32,23 @@
     <div class="field">
       <label for="role">Login as</label>
       <select id="role">
+        <option value="student">Student</option>
         <option value="teacher">Teacher</option>
         <option value="admin">Admin</option>
-        <option value="student">Student</option>
       </select>
     </div>
 
     <button id="login-btn" onclick="handleLogin()">Sign in</button>
+
+    <!-- Divider -->
+    <div class="auth-divider">
+      <span>New student?</span>
+    </div>
+
+    <a href="signup.html" class="btn-outline">
+      Create student account
+    </a>
+
   </div>
 
   <script src="../js/login.js"></script>
