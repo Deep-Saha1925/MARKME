@@ -19,8 +19,8 @@ A QR-based attendance system for colleges. Teachers generate a QR code at the st
 |---|---|
 | Frontend | Plain HTML + CSS + JavaScript |
 | Backend | Node.js + Express |
-| Database | PostgreSQL |
-| Token cache | Redis |
+| Database | Neon (serverless PostgreSQL) |
+| Token cache | Upstash (serverless Redis) |
 | Auth | JWT (JSON Web Tokens) |
 | QR generation | `qrcode` npm package |
 
@@ -37,7 +37,8 @@ markme/
 │   │   └── attendance.js    → student scans QR
 │   ├── middleware/
 │   │   └── auth.js          → JWT verification
-│   ├── db.js                → PostgreSQL connection
+│   ├── db.js                → Neon PostgreSQL connection
+│   ├── redis.js             → Upstash Redis connection
 │   └── server.js            → main entry point
 │
 ├── public/
@@ -53,7 +54,7 @@ markme/
 │       ├── dashboard.js
 │       └── scanner.js
 │
-├── .env                     → secrets & DB credentials (never commit this)
+├── .env                     → secrets & credentials (never commit this)
 └── package.json
 ```
 
@@ -76,8 +77,8 @@ markme/
 ### Prerequisites
 
 - [Node.js](https://nodejs.org) (LTS version)
-- [PostgreSQL](https://www.postgresql.org)
-- [Redis](https://redis.io)
+- [Neon](https://neon.tech) account — free serverless PostgreSQL
+- [Upstash](https://upstash.com) account — free serverless Redis
 
 ### 1. Clone and install
 
@@ -87,28 +88,40 @@ cd markme
 npm install
 ```
 
-### 2. Set up environment variables
+### 2. Set up Neon (PostgreSQL)
+
+1. Go to [neon.tech](https://neon.tech) and create a free account
+2. Create a new project called `markme`
+3. Copy the **connection string** — looks like:
+   `postgresql://user:password@ep-xxxx.us-east-2.aws.neon.tech/markme?sslmode=require`
+
+### 3. Set up Upstash (Redis)
+
+1. Go to [upstash.com](https://upstash.com) and create a free account
+2. Create a new Redis database, pick the region closest to you
+3. Copy the **REST URL** and **REST Token** from the dashboard
+
+### 4. Set up environment variables
 
 Create a `.env` file in the root folder:
 
 ```env
 PORT=3000
 JWT_SECRET=your_secret_key_here
-DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/markme
-REDIS_URL=redis://localhost:6379
+
+# Neon PostgreSQL
+DATABASE_URL=postgresql://user:password@ep-xxxx.us-east-2.aws.neon.tech/markme?sslmode=require
+
+# Upstash Redis
+UPSTASH_REDIS_REST_URL=https://your-url.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token_here
 ```
 
-### 3. Set up the database
+### 5. Set up the database schema
 
-Open PostgreSQL and run:
+Open the Neon dashboard → SQL Editor and paste the full schema from `backend/schema.sql`.
 
-```sql
-CREATE DATABASE markme;
-```
-
-Then run the full schema from `backend/db.sql` to create all tables.
-
-### 4. Start the server
+### 6. Start the server
 
 ```bash
 node backend/server.js
@@ -121,11 +134,11 @@ Visit `http://localhost:3000` in your browser.
 ## How the QR flow works
 
 1. Teacher logs in and selects a course session
-2. Backend generates a signed token and stores it in Redis with a 10-minute expiry
+2. Backend generates a signed token and stores it in Upstash Redis with a 10-minute expiry
 3. A QR code is generated from the token and displayed on screen
 4. Student opens the app, scans the QR — app sends token + location to the server
 5. Server validates: token not expired, student not already scanned, location within geo-fence
-6. Attendance is recorded in PostgreSQL
+6. Attendance is recorded in Neon PostgreSQL
 
 ---
 
@@ -145,6 +158,7 @@ Visit `http://localhost:3000` in your browser.
 - [x] Project setup
 - [x] Database schema
 - [x] Folder structure
+- [x] Neon + Upstash cloud setup
 - [ ] Login API + login page
 - [ ] Teacher dashboard
 - [ ] QR generation
