@@ -184,9 +184,10 @@ function previewCSV() {
       roll_no: cols[0].toUpperCase(),
       name:    cols[1],
       email:   cols[2],
-      branch:  cols[3] || null,
-      year:    cols[4] ? parseInt(cols[4]) : null,
-      section: cols[5] || null,
+      password: cols[3],
+      branch:  cols[4] || null,
+      year:    cols[5] ? parseInt(cols[5]) : null,
+      section: cols[6] || null,
     });
   }
 
@@ -203,7 +204,7 @@ function previewCSV() {
       <div style="overflow-x:auto">
         <table>
           <thead><tr>
-            <th>Roll no</th><th>Name</th><th>Email</th>
+            <th>Roll no</th><th>Name</th><th>Email</th><th>Password</th>
             <th>Branch</th><th>Year</th><th>Sec</th>
           </tr></thead>
           <tbody>
@@ -212,6 +213,7 @@ function previewCSV() {
                 <td>${s.roll_no}</td>
                 <td>${s.name}</td>
                 <td style="color:#73726c">${s.email}</td>
+                <td style="color:#73726c;font-size:12px">${s.password}</td>
                 <td>${s.branch  || '—'}</td>
                 <td>${s.year    || '—'}</td>
                 <td>${s.section || '—'}</td>
