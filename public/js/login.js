@@ -36,6 +36,8 @@ async function handleLogin() {
     // Redirect based on role
     if (data.user.role === 'student') {
       window.location.href = '/pages/attendance.html';
+    } else if (data.user.role === 'admin') {
+      window.location.href = '/pages/admin.html';
     } else {
       window.location.href = '/pages/dashboard.html';
     }

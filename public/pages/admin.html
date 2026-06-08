@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkMe — Admin Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MarkMe</span>
+      <span class="nav-badge">Admin</span>
+    </div>
+    <div class="nav-right">
+      <span id="admin-name" class="nav-user"></span>
+      <button class="btn-ghost" onclick="logout()">Sign out</button>
+    </div>
+  </nav>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('students')">Students</button>
+    <button class="tab"        onclick="switchTab('teachers')">Teachers</button>
+    <button class="tab"        onclick="switchTab('courses')">Courses</button>
+  </div>
+
+  <main class="container">
+
+    <!-- ══════════════════════════════════════
+         STUDENTS TAB
+    ══════════════════════════════════════ -->
+    <div id="tab-students">
+
+      <!-- Stats row -->
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total">—</div>
+          <div class="stat-label">Total students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-active">—</div>
+          <div class="stat-label">Activated</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-pending">—</div>
+          <div class="stat-label">Pending activation</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+
+        <!-- Register single student -->
+        <div class="card">
+          <h2>Register student</h2>
+          <p class="text-muted">Add one student manually</p>
+
+          <div id="student-error"   class="error-box   hidden"></div>
+          <div id="student-success" class="success-box hidden"></div>
+
+          <div class="field">
+            <label>Roll number</label>
+            <input type="text" id="s-roll" placeholder="e.g. 22CS045"
+              oninput="this.value = this.value.toUpperCase()">
+          </div>
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="s-name" placeholder="Riya Sharma">
+          </div>
+          <div class="field">
+            <label>College email</label>
+            <input type="email" id="s-email" placeholder="riya@college.edu">
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Branch</label>
+              <input type="text" id="s-branch" placeholder="CSE">
+            </div>
+            <div class="field">
+              <label>Year</label>
+              <select id="s-year">
+                <option value="">—</option>
+                <option>1</option><option>2</option>
+                <option>3</option><option>4</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Section</label>
+              <input type="text" id="s-section" placeholder="B"
+                oninput="this.value = this.value.toUpperCase()">
+            </div>
+          </div>
+
+          <button onclick="registerStudent()">Add student</button>
+        </div>
+
+        <!-- Bulk import -->
+        <div class="card">
+          <h2>Bulk import</h2>
+          <p class="text-muted">Paste a CSV to register many students at once</p>
+
+          <div id="bulk-error"   class="error-box   hidden"></div>
+          <div id="bulk-success" class="success-box hidden"></div>
+
+          <div class="csv-format">
+            <div class="csv-format-title">CSV format</div>
+            <code>roll_no,name,email,branch,year,section</code><br>
+            <code>22CS045,Riya Sharma,riya@college.edu,CSE,3,B</code><br>
+            <code>22CS046,Arjun Mehta,arjun@college.edu,CSE,3,B</code>
+          </div>
+
+          <div class="field">
+            <label>Paste CSV here</label>
+            <textarea id="csv-input" rows="7"
+              placeholder="roll_no,name,email,branch,year,section&#10;22CS045,Riya Sharma,riya@college.edu,CSE,3,B"></textarea>
+          </div>
+
+          <div id="bulk-preview" class="hidden"></div>
+
+          <div style="display:flex;gap:10px">
+            <button class="btn-secondary" onclick="previewCSV()">Preview</button>
+            <button id="bulk-btn" onclick="bulkImport()" class="hidden">Import all</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Students table -->
+      <div class="card" style="margin-top:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h2 style="margin:0">All students</h2>
+          <input type="text" id="search-input" placeholder="Search by name or roll no..."
+            oninput="filterStudents()" style="width:240px;padding:8px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px">
+        </div>
+        <div id="students-table">
+          <p class="text-muted">Loading...</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         TEACHERS TAB
+    ══════════════════════════════════════ -->
+    <div id="tab-teachers" class="hidden">
+
+      <div class="two-col">
+
+        <!-- Add teacher -->
+        <div class="card">
+          <h2>Add teacher</h2>
+          <p class="text-muted">Create a teacher account</p>
+
+          <div id="teacher-error"   class="error-box   hidden"></div>
+          <div id="teacher-success" class="success-box hidden"></div>
+
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="t-name" placeholder="Prof. Sharma">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="t-email" placeholder="sharma@college.edu">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="t-password" placeholder="Min. 8 characters">
+          </div>
+
+          <button onclick="registerTeacher()">Add teacher</button>
+        </div>
+
+        <!-- Teachers list -->
+        <div class="card">
+          <h2>All teachers</h2>
+          <div id="teachers-list">
+            <p class="text-muted">Loading...</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         COURSES TAB
+    ══════════════════════════════════════ -->
+    <div id="tab-courses" class="hidden">
+
+      <div class="two-col">
+
+        <!-- Add course -->
+        <div class="card">
+          <h2>Add course</h2>
+          <p class="text-muted">Create and assign a course to a teacher</p>
+
+          <div id="course-error"   class="error-box   hidden"></div>
+          <div id="course-success" class="success-box hidden"></div>
+
+          <div class="field">
+            <label>Course name</label>
+            <input type="text" id="c-name" placeholder="Data Structures">
+          </div>
+          <div class="field">
+            <label>Course code</label>
+            <input type="text" id="c-code" placeholder="CS301"
+              oninput="this.value = this.value.toUpperCase()">
+          </div>
+          <div class="field">
+            <label>Assign teacher</label>
+            <select id="c-teacher">
+              <option value="">Loading teachers...</option>
+            </select>
+          </div>
+
+          <button onclick="addCourse()">Add course</button>
+        </div>
+
+        <!-- Courses list -->
+        <div class="card">
+          <h2>All courses</h2>
+          <div id="courses-list">
+            <p class="text-muted">Loading...</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../js/admin.js"></script>
+</body>
+</html>
