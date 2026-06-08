@@ -175,6 +175,7 @@ router.post('/register/students/bulk', authMiddleware, async (req, res) => {
   }
 
   const { students } = req.body; // array of student objects
+  
 
   if (!Array.isArray(students) || !students.length) {
     return res.status(400).json({ error: 'Provide a non-empty students array' });

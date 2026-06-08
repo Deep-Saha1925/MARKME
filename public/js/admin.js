@@ -238,10 +238,12 @@ async function bulkImport() {
     method: 'POST',
     body: JSON.stringify({ students: parsedStudents })
   });
+  console.log(data, "hi");
 
   btn.textContent = 'Import';
   btn.disabled = true; // keep disabled after import
 
+  console.log(data.created.length, data.failed.length);
   if (!ok) return showMsg('b-msg', 'error', data.error || 'Import failed');
 
   const skipped = data.failed.length
