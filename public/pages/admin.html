@@ -6,57 +6,22 @@
   <title>MarkMe — Admin</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f4f4f0;
-      color: #1a1a18;
-      min-height: 100vh;
-    }
+    body { font-family: system-ui, sans-serif; background: #f4f4f0; color: #1a1a18; min-height: 100vh; }
 
     /* ── Navbar ── */
-    .navbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 28px;
-      background: #fff;
-      border-bottom: 1px solid #e0dfd8;
-    }
+    .navbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: #fff; border-bottom: 1px solid #e0dfd8; }
     .nav-logo { display: flex; align-items: center; gap: 8px; }
-    .logo-mark {
-      width: 32px; height: 32px;
-      background: #534AB7; color: #fff;
-      border-radius: 8px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .logo-mark { width: 32px; height: 32px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
     .logo-text { font-size: 18px; font-weight: 600; }
-    .nav-badge {
-      font-size: 11px; background: #EEEDF8; color: #534AB7;
-      padding: 2px 8px; border-radius: 20px; font-weight: 500;
-    }
+    .nav-badge { font-size: 11px; background: #EEEDF8; color: #534AB7; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
     .nav-right { display: flex; align-items: center; gap: 12px; }
     .nav-user  { font-size: 14px; color: #73726c; }
-    .btn-signout {
-      padding: 7px 14px; font-size: 13px; cursor: pointer;
-      background: none; border: 1px solid #d3d1c7;
-      border-radius: 8px; color: #3d3d3a;
-    }
+    .btn-signout { padding: 7px 14px; font-size: 13px; cursor: pointer; background: none; border: 1px solid #d3d1c7; border-radius: 8px; color: #3d3d3a; }
     .btn-signout:hover { background: #f4f4f0; }
 
     /* ── Tabs ── */
-    .tab-bar {
-      display: flex;
-      background: #fff;
-      border-bottom: 1px solid #e0dfd8;
-      padding: 0 28px;
-    }
-    .tab {
-      padding: 12px 20px; font-size: 14px; font-weight: 500;
-      background: none; border: none; cursor: pointer;
-      color: #73726c; border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-    }
+    .tab-bar { display: flex; background: #fff; border-bottom: 1px solid #e0dfd8; padding: 0 28px; }
+    .tab { padding: 12px 20px; font-size: 14px; font-weight: 500; background: none; border: none; cursor: pointer; color: #73726c; border-bottom: 2px solid transparent; margin-bottom: -1px; }
     .tab:hover  { color: #1a1a18; }
     .tab.active { color: #534AB7; border-bottom-color: #534AB7; }
 
@@ -65,154 +30,92 @@
     .hidden    { display: none !important; }
 
     /* ── Stats ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: #fff;
-      border: 1px solid #e0dfd8;
-      border-radius: 12px;
-      padding: 18px 22px;
-    }
-    .stat-num   { font-size: 28px; font-weight: 600; color: #534AB7; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 18px 22px; }
+    .stat-num  { font-size: 28px; font-weight: 600; color: #534AB7; }
     .stat-label { font-size: 13px; color: #73726c; margin-top: 2px; }
 
     /* ── Cards ── */
-    .card {
-      background: #fff;
-      border: 1px solid #e0dfd8;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
+    .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
     .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
     .card p  { font-size: 13px; color: #73726c; margin-bottom: 18px; }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
 
     /* ── Form fields ── */
-    .field       { margin-bottom: 14px; }
-    .field label { display: block; font-size: 13px; font-weight: 500;
-                   color: #3d3d3a; margin-bottom: 5px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: #3d3d3a; margin-bottom: 5px; }
     .field input, .field select, .field textarea {
-      width: 100%; padding: 9px 12px;
-      border: 1px solid #d3d1c7; border-radius: 8px;
-      font-size: 14px; background: #fafaf8; outline: none;
-      font-family: inherit; transition: border-color 0.15s;
+      width: 100%; padding: 9px 12px; border: 1px solid #d3d1c7; border-radius: 8px;
+      font-size: 14px; background: #fafaf8; outline: none; font-family: inherit; transition: border-color 0.15s;
     }
-    .field input:focus, .field select:focus, .field textarea:focus {
-      border-color: #534AB7; background: #fff;
-    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #534AB7; background: #fff; }
     .field textarea { resize: vertical; font-family: monospace; font-size: 12px; }
-
     .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
     /* ── Buttons ── */
-    .btn-primary {
-      width: 100%; padding: 10px; font-size: 14px; font-weight: 500;
-      background: #534AB7; color: #fff; border: none;
-      border-radius: 8px; cursor: pointer; margin-top: 4px;
-    }
+    .btn-primary { width: 100%; padding: 10px; font-size: 14px; font-weight: 500; background: #534AB7; color: #fff; border: none; border-radius: 8px; cursor: pointer; margin-top: 4px; }
     .btn-primary:hover    { background: #3C3489; }
     .btn-primary:disabled { background: #9c9a92; cursor: not-allowed; }
-
-    .btn-secondary {
-      padding: 10px 18px; font-size: 14px; font-weight: 500;
-      background: #EEEDF8; color: #534AB7; border: none;
-      border-radius: 8px; cursor: pointer;
-    }
+    .btn-secondary { padding: 10px 18px; font-size: 14px; font-weight: 500; background: #EEEDF8; color: #534AB7; border: none; border-radius: 8px; cursor: pointer; }
     .btn-secondary:hover { background: #DDD9F3; }
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
     /* ── Messages ── */
-    .msg-error {
-      padding: 10px 14px; border-radius: 8px; font-size: 13px;
-      margin-bottom: 14px;
-      background: #FCEBEB; color: #791F1F; border: 1px solid #f09595;
-    }
-    .msg-success {
-      padding: 10px 14px; border-radius: 8px; font-size: 13px;
-      margin-bottom: 14px;
-      background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5;
-    }
+    .msg-error   { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; background: #FCEBEB; color: #791F1F; border: 1px solid #f09595; }
+    .msg-success { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5; }
 
-    /* ── CSV hint box ── */
-    .csv-hint {
-      background: #f4f4f0; border: 1px solid #e0dfd8;
-      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
-      font-size: 12px; color: #534AB7; font-family: monospace; line-height: 1.9;
+    /* ── Import toggle ── */
+    .import-toggle { display: flex; gap: 0; margin-bottom: 14px; border: 1px solid #d3d1c7; border-radius: 8px; overflow: hidden; }
+    .toggle-btn { flex: 1; padding: 8px; font-size: 13px; font-weight: 500; background: none; border: none; cursor: pointer; color: #73726c; transition: all 0.15s; }
+    .toggle-btn.active { background: #534AB7; color: #fff; }
+    .toggle-btn:not(.active):hover { background: #f4f4f0; }
+
+    /* ── File drop zone ── */
+    .drop-zone {
+      border: 2px dashed #d3d1c7; border-radius: 10px;
+      padding: 28px 20px; text-align: center; cursor: pointer;
+      transition: all 0.15s; margin-bottom: 14px; background: #fafaf8;
     }
-    .csv-hint-title { font-family: system-ui; font-weight: 600;
-                      color: #3d3d3a; margin-bottom: 4px; font-size: 12px; }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: #534AB7; background: #EEEDF8; }
+    .drop-zone input[type="file"] { display: none; }
+    .drop-icon  { font-size: 28px; margin-bottom: 8px; }
+    .drop-label { font-size: 14px; font-weight: 500; color: #3d3d3a; margin-bottom: 4px; }
+    .drop-hint  { font-size: 12px; color: #9c9a92; }
+    .drop-filename { font-size: 13px; color: #534AB7; font-weight: 500; margin-top: 8px; }
+
+    /* ── CSV hint ── */
+    .csv-hint { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #534AB7; font-family: monospace; line-height: 1.9; }
+    .csv-hint-title { font-family: system-ui; font-weight: 600; color: #3d3d3a; margin-bottom: 4px; font-size: 12px; }
 
     /* ── Table ── */
-    .table-scroll { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th {
-      text-align: left; padding: 10px 12px;
-      color: #73726c; font-weight: 500;
-      border-bottom: 1px solid #e0dfd8; white-space: nowrap;
-    }
+    th { text-align: left; padding: 10px 12px; color: #73726c; font-weight: 500; border-bottom: 1px solid #e0dfd8; white-space: nowrap; }
     td { padding: 10px 12px; border-bottom: 1px solid #f0efe8; }
-    tr:last-child td  { border-bottom: none; }
+    tr:last-child td { border-bottom: none; }
     tr:hover td { background: #fafaf8; }
 
-    .roll-tag {
-      background: #EEEDF8; color: #534AB7; font-size: 11px;
-      font-weight: 600; padding: 2px 7px; border-radius: 4px;
-      font-family: monospace;
-    }
-    .badge {
-      font-size: 11px; font-weight: 500;
-      padding: 3px 10px; border-radius: 20px;
-    }
+    .roll-tag { background: #EEEDF8; color: #534AB7; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; font-family: monospace; }
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
     .badge-green  { background: #E1F5EE; color: #0F6E56; }
     .badge-yellow { background: #FAEEDA; color: #854F0B; }
 
-    /* ── List rows (teachers/courses) ── */
-    .list-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 11px 0; border-bottom: 1px solid #f0efe8;
-    }
+    /* ── List rows ── */
+    .list-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f0efe8; }
     .list-item:last-child { border-bottom: none; }
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: #EEEDF8; color: #534AB7;
-      font-weight: 700; font-size: 13px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: #EEEDF8; color: #534AB7; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .list-name   { font-size: 14px; font-weight: 500; }
     .list-detail { font-size: 12px; color: #73726c; margin-top: 1px; }
 
     /* ── Search ── */
-    .table-header {
-      display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 16px;
-    }
-    .search-input {
-      padding: 8px 12px; border: 1px solid #d3d1c7;
-      border-radius: 8px; font-size: 13px; width: 220px; outline: none;
-    }
+    .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .search-input { padding: 8px 12px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; width: 220px; outline: none; }
     .search-input:focus { border-color: #534AB7; }
 
     /* ── Preview ── */
-    .preview-box {
-      background: #f4f4f0; border: 1px solid #e0dfd8;
-      border-radius: 8px; padding: 10px; margin-bottom: 14px;
-      max-height: 200px; overflow-y: auto;
-    }
-    .preview-title {
-      font-size: 13px; font-weight: 500; color: #0F6E56; margin-bottom: 8px;
-    }
-    .btn-row { display: flex; gap: 10px; }
+    .preview-box { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px; margin-bottom: 14px; max-height: 200px; overflow-y: auto; }
+    .preview-title { font-size: 13px; font-weight: 500; color: #0F6E56; margin-bottom: 8px; }
+    .preview-note  { font-size: 12px; color: #73726c; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -237,22 +140,13 @@
 
   <main class="container">
 
-    <!-- ══ STUDENTS ══ -->
+    <!-- ══ STUDENTS TAB ══ -->
     <div id="tab-students">
 
       <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-num" id="stat-total">—</div>
-          <div class="stat-label">Total students</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-active">—</div>
-          <div class="stat-label">Activated</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-pending">—</div>
-          <div class="stat-label">Pending setup</div>
-        </div>
+        <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total students</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-active">—</div><div class="stat-label">Activated</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending setup</div></div>
       </div>
 
       <div class="two-col">
@@ -262,69 +156,69 @@
           <h2>Register student</h2>
           <p>Add one student manually</p>
           <div id="s-msg"></div>
-          <div class="field">
-            <label>Roll number</label>
-            <input type="text" id="s-roll" placeholder="22CS045"
-              oninput="this.value=this.value.toUpperCase()">
+          <div class="field"><label>Roll number</label>
+            <input type="text" id="s-roll" placeholder="22CS045" oninput="this.value=this.value.toUpperCase()">
           </div>
-          <div class="field">
-            <label>Full name</label>
-            <input type="text" id="s-name" placeholder="Virat Kohli">
+          <div class="field"><label>Full name</label>
+            <input type="text" id="s-name" placeholder="Riya Sharma">
           </div>
-          <div class="field">
-            <label>College email</label>
-            <input type="email" id="s-email" placeholder="kohli@college.edu">
+          <div class="field"><label>College email</label>
+            <input type="email" id="s-email" placeholder="riya@college.edu">
           </div>
-
-          <div class="field">
-            <label>Password</label>
-            <input type="password" id="s-password" placeholder="Min. 8 characters">
+          <div class="field"><label>Password <span style="color:#9c9a92;font-weight:400">(leave blank → student sets own)</span></label>
+            <input type="password" id="s-password" placeholder="Optional">
           </div>
-
           <div class="row-3">
-            <div class="field">
-              <label>Branch</label>
-              <input type="text" id="s-branch" placeholder="CSE">
+            <div class="field"><label>Branch</label><input type="text" id="s-branch" placeholder="CSE"></div>
+            <div class="field"><label>Year</label>
+              <select id="s-year"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
             </div>
-            <div class="field">
-              <label>Year</label>
-              <select id="s-year">
-                <option value="">—</option>
-                <option>1</option><option>2</option>
-                <option>3</option><option>4</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Section</label>
-              <input type="text" id="s-section" placeholder="B"
-                oninput="this.value=this.value.toUpperCase()">
-            </div>
+            <div class="field"><label>Section</label><input type="text" id="s-section" placeholder="B" oninput="this.value=this.value.toUpperCase()"></div>
           </div>
-          <button class="btn-primary" id="s-btn" onclick="registerStudent()">
-            Add student
-          </button>
+          <button class="btn-primary" id="s-btn" onclick="registerStudent()">Add student</button>
         </div>
 
-        <!-- Bulk import -->
+        <!-- Bulk import students -->
         <div class="card">
-          <h2>Bulk import</h2>
-          <p>Paste CSV to register many students at once</p>
+          <h2>Bulk import students</h2>
+          <p>Upload a file or paste CSV to register many at once</p>
           <div id="b-msg"></div>
-          <div class="csv-hint">
-            <div class="csv-hint-title">CSV format (header optional)</div>
-            roll_no,name,email,password,branch,year,section<br>
-            22CS045,Riya Sharma,riya@college.edu,pass123,CSE,3,B<br>
-            22CS046,Arjun Mehta,arjun@college.edu,pass456,CSE,3,A
+
+          <!-- Toggle: file vs paste -->
+          <div class="import-toggle">
+            <button class="toggle-btn active" id="s-toggle-file" onclick="switchImportMode('students','file')">📁 Upload file</button>
+            <button class="toggle-btn"        id="s-toggle-paste" onclick="switchImportMode('students','paste')">📋 Paste CSV</button>
           </div>
-          <div class="field">
-            <label>Paste CSV</label>
-            <textarea id="csv-input" rows="6" placeholder="Paste your CSV here..."></textarea>
+
+          <!-- File upload -->
+          <div id="s-file-area">
+            <div class="drop-zone" id="s-drop-zone" onclick="document.getElementById('s-file-input').click()"
+              ondragover="handleDragOver(event,'s-drop-zone')" ondragleave="handleDragLeave('s-drop-zone')"
+              ondrop="handleDrop(event,'students')">
+              <input type="file" id="s-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event,'students')">
+              <div class="drop-icon">📂</div>
+              <div class="drop-label">Click to upload or drag & drop</div>
+              <div class="drop-hint">Supports CSV, XLSX, XLS</div>
+              <div class="drop-filename" id="s-filename"></div>
+            </div>
           </div>
+
+          <!-- Paste CSV -->
+          <div id="s-paste-area" class="hidden">
+            <div class="csv-hint">
+              <div class="csv-hint-title">CSV format (header optional)</div>
+              roll_no,name,email,password,branch,year,section<br>
+              22CS045,Riya,riya@college.edu,pass123,CSE,3,B
+            </div>
+            <div class="field"><label>Paste CSV</label>
+              <textarea id="csv-input" rows="5" placeholder="Paste CSV data here..."></textarea>
+            </div>
+          </div>
+
           <div id="b-preview" class="hidden"></div>
           <div class="btn-row">
-            <button class="btn-secondary" onclick="previewCSV()">Preview</button>
-            <button class="btn-primary" id="b-import-btn" style="width:auto;padding:10px 18px"
-              onclick="bulkImport()" disabled>Import</button>
+            <button class="btn-secondary" onclick="previewStudents()">Preview</button>
+            <button class="btn-primary" id="b-import-btn" style="width:auto;padding:10px 18px" onclick="bulkImportStudents()" disabled>Import</button>
           </div>
         </div>
 
@@ -334,15 +228,13 @@
       <div class="card">
         <div class="table-header">
           <h2 style="margin:0">All students</h2>
-          <input class="search-input" placeholder="Search name or roll no..."
-            oninput="filterStudents(this.value)">
+          <input class="search-input" placeholder="Search name or roll no..." oninput="filterStudents(this.value)">
         </div>
         <div id="s-table"><p style="color:#73726c;font-size:14px">Loading...</p></div>
       </div>
-
     </div>
 
-    <!-- ══ TEACHERS ══ -->
+    <!-- ══ TEACHERS TAB ══ -->
     <div id="tab-teachers" class="hidden">
       <div class="two-col">
 
@@ -350,33 +242,62 @@
           <h2>Add teacher</h2>
           <p>Create a new teacher account</p>
           <div id="t-msg"></div>
-          <div class="field">
-            <label>Full name</label>
-            <input type="text" id="t-name" placeholder="Prof. Sharma">
-          </div>
-          <div class="field">
-            <label>Email</label>
-            <input type="email" id="t-email" placeholder="sharma@college.edu">
-          </div>
-          <div class="field">
-            <label>Password</label>
-            <input type="password" id="t-pass" placeholder="Min. 8 characters">
-          </div>
-          <button class="btn-primary" id="t-btn" onclick="registerTeacher()">
-            Add teacher
-          </button>
+          <div class="field"><label>Full name</label><input type="text" id="t-name" placeholder="Prof. Sharma"></div>
+          <div class="field"><label>Email</label><input type="email" id="t-email" placeholder="sharma@college.edu"></div>
+          <div class="field"><label>Password</label><input type="password" id="t-pass" placeholder="Min. 8 characters"></div>
+          <button class="btn-primary" id="t-btn" onclick="registerTeacher()">Add teacher</button>
         </div>
 
+        <!-- Bulk import teachers -->
         <div class="card">
+          <h2>Bulk import teachers</h2>
+          <p>Upload a file or paste CSV</p>
+          <div id="tb-msg"></div>
+
+          <div class="import-toggle">
+            <button class="toggle-btn active" id="t-toggle-file"  onclick="switchImportMode('teachers','file')">📁 Upload file</button>
+            <button class="toggle-btn"        id="t-toggle-paste" onclick="switchImportMode('teachers','paste')">📋 Paste CSV</button>
+          </div>
+
+          <div id="t-file-area">
+            <div class="drop-zone" id="t-drop-zone" onclick="document.getElementById('t-file-input').click()"
+              ondragover="handleDragOver(event,'t-drop-zone')" ondragleave="handleDragLeave('t-drop-zone')"
+              ondrop="handleDrop(event,'teachers')">
+              <input type="file" id="t-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event,'teachers')">
+              <div class="drop-icon">📂</div>
+              <div class="drop-label">Click to upload or drag & drop</div>
+              <div class="drop-hint">Supports CSV, XLSX, XLS</div>
+              <div class="drop-filename" id="t-filename"></div>
+            </div>
+          </div>
+
+          <div id="t-paste-area" class="hidden">
+            <div class="csv-hint">
+              <div class="csv-hint-title">CSV format</div>
+              name,email,password<br>
+              Prof. Sharma,sharma@college.edu,pass1234
+            </div>
+            <div class="field"><label>Paste CSV</label>
+              <textarea id="t-csv-input" rows="5" placeholder="Paste CSV data here..."></textarea>
+            </div>
+          </div>
+
+          <div id="tb-preview" class="hidden"></div>
+          <div class="btn-row">
+            <button class="btn-secondary" onclick="previewTeachers()">Preview</button>
+            <button class="btn-primary" id="tb-import-btn" style="width:auto;padding:10px 18px" onclick="bulkImportTeachers()" disabled>Import</button>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:1/-1">
           <h2>All teachers</h2>
-          <p> </p>
           <div id="t-list"><p style="color:#73726c;font-size:14px">Loading...</p></div>
         </div>
 
       </div>
     </div>
 
-    <!-- ══ COURSES ══ -->
+    <!-- ══ COURSES TAB ══ -->
     <div id="tab-courses" class="hidden">
       <div class="two-col">
 
@@ -384,27 +305,55 @@
           <h2>Add course</h2>
           <p>Create and assign a course to a teacher</p>
           <div id="c-msg"></div>
-          <div class="field">
-            <label>Course name</label>
-            <input type="text" id="c-name" placeholder="Data Structures">
-          </div>
-          <div class="field">
-            <label>Course code</label>
-            <input type="text" id="c-code" placeholder="CS301"
-              oninput="this.value=this.value.toUpperCase()">
-          </div>
-          <div class="field">
-            <label>Assign teacher</label>
-            <select id="c-teacher"></select>
-          </div>
-          <button class="btn-primary" id="c-btn" onclick="addCourse()">
-            Add course
-          </button>
+          <div class="field"><label>Course name</label><input type="text" id="c-name" placeholder="Data Structures"></div>
+          <div class="field"><label>Course code</label><input type="text" id="c-code" placeholder="CS301" oninput="this.value=this.value.toUpperCase()"></div>
+          <div class="field"><label>Assign teacher</label><select id="c-teacher"></select></div>
+          <button class="btn-primary" id="c-btn" onclick="addCourse()">Add course</button>
         </div>
 
+        <!-- Bulk import courses -->
         <div class="card">
+          <h2>Bulk import courses</h2>
+          <p>Upload a file or paste CSV</p>
+          <div id="cb-msg"></div>
+
+          <div class="import-toggle">
+            <button class="toggle-btn active" id="c-toggle-file"  onclick="switchImportMode('courses','file')">📁 Upload file</button>
+            <button class="toggle-btn"        id="c-toggle-paste" onclick="switchImportMode('courses','paste')">📋 Paste CSV</button>
+          </div>
+
+          <div id="c-file-area">
+            <div class="drop-zone" id="c-drop-zone" onclick="document.getElementById('c-file-input').click()"
+              ondragover="handleDragOver(event,'c-drop-zone')" ondragleave="handleDragLeave('c-drop-zone')"
+              ondrop="handleDrop(event,'courses')">
+              <input type="file" id="c-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event,'courses')">
+              <div class="drop-icon">📂</div>
+              <div class="drop-label">Click to upload or drag & drop</div>
+              <div class="drop-hint">Supports CSV, XLSX, XLS</div>
+              <div class="drop-filename" id="c-filename"></div>
+            </div>
+          </div>
+
+          <div id="c-paste-area" class="hidden">
+            <div class="csv-hint">
+              <div class="csv-hint-title">CSV format</div>
+              name,code,teacher_email<br>
+              Data Structures,CS301,sharma@college.edu
+            </div>
+            <div class="field"><label>Paste CSV</label>
+              <textarea id="c-csv-input" rows="5" placeholder="Paste CSV data here..."></textarea>
+            </div>
+          </div>
+
+          <div id="cb-preview" class="hidden"></div>
+          <div class="btn-row">
+            <button class="btn-secondary" onclick="previewCourses()">Preview</button>
+            <button class="btn-primary" id="cb-import-btn" style="width:auto;padding:10px 18px" onclick="bulkImportCourses()" disabled>Import</button>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:1/-1">
           <h2>All courses</h2>
-          <p> </p>
           <div id="c-list"><p style="color:#73726c;font-size:14px">Loading...</p></div>
         </div>
 
@@ -413,6 +362,8 @@
 
   </main>
 
+  <!-- SheetJS for Excel parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="../js/admin.js"></script>
 </body>
 </html>
