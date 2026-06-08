@@ -1,0 +1,174 @@
+/* ── Add these to the bottom of public/css/style.css ── */
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 0 32px;
+  background: #fff;
+  border-bottom: 1px solid #e0dfd8;
+}
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #73726c;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 0;
+  width: auto;
+  transition: color 0.15s;
+  margin-bottom: -1px;
+}
+.tab:hover  { color: #1a1a18; background: none; }
+.tab.active { color: #534AB7; border-bottom-color: #534AB7; }
+
+/* Nav badge */
+.nav-badge {
+  font-size: 11px;
+  background: #EEE;
+  color: #534AB7;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* Stats row */
+.stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  background: #fff;
+  border: 1px solid #e0dfd8;
+  border-radius: 12px;
+  padding: 20px 28px;
+  flex: 1;
+  min-width: 140px;
+}
+.stat-num   { font-size: 28px; font-weight: 500; color: #534AB7; }
+.stat-label { font-size: 13px; color: #73726c; margin-top: 2px; }
+
+/* Two column layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+@media (max-width: 680px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+/* Table */
+.table-wrap  { overflow-x: auto; }
+.data-table  {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 500;
+  color: #73726c;
+  border-bottom: 1px solid #e0dfd8;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0efe8;
+  color: #1a1a18;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #fafaf8; }
+
+/* Badges */
+.roll-tag {
+  background: #EEEDF8;
+  color: #534AB7;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+.status-badge   { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.badge-active  { background: #E1F5EE; color: #0F6E56; }
+.badge-pending { background: #FAEEDA; color: #854F0B; }
+
+/* CSV format hint */
+.csv-format {
+  background: #f4f4f0;
+  border: 1px solid #e0dfd8;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+.csv-format-title { font-weight: 500; margin-bottom: 6px; color: #3d3d3a; }
+.csv-format code  { color: #534AB7; display: block; line-height: 1.8; }
+
+/* Bulk preview */
+.preview-header {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0F6E56;
+  margin-bottom: 8px;
+}
+
+/* Secondary button */
+.btn-secondary {
+  background: #EEEDF8;
+  color: #534AB7;
+  border: none;
+  width: auto;
+  padding: 10px 18px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-secondary:hover { background: #DDD9F3; }
+
+/* Teacher/Course list rows */
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0efe8;
+}
+.list-row:last-child { border-bottom: none; }
+.list-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #EEEDF8;
+  color: #534AB7;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.list-name { font-size: 14px; font-weight: 500; }
+
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d3d1c7;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: monospace;
+  resize: vertical;
+  background: #fafaf8;
+  outline: none;
+  transition: border-color 0.15s;
+}
+textarea:focus { border-color: #534AB7; background: #fff; }
