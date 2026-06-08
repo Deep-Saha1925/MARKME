@@ -123,14 +123,15 @@ async function registerStudent() {
   const roll_no = document.getElementById('s-roll').value.trim();
   const name    = document.getElementById('s-name').value.trim();
   const email   = document.getElementById('s-email').value.trim();
+  const password= document.getElementById('s-password').value;
   const branch  = document.getElementById('s-branch').value.trim();
   const year    = document.getElementById('s-year').value;
   const section = document.getElementById('s-section').value.trim();
 
   clearMsg('s-msg');
 
-  if (!roll_no || !name || !email) {
-    return showMsg('s-msg', 'error', 'Roll number, name and email are required');
+  if (!roll_no || !name || !email || !password) {
+    return showMsg('s-msg', 'error', 'Roll number, name, email and password are required');
   }
 
   const btn = document.getElementById('s-btn');
@@ -140,7 +141,7 @@ async function registerStudent() {
   const { ok, data } = await api('/api/auth/register/student', {
     method: 'POST',
     body: JSON.stringify({
-      roll_no, name, email, branch,
+      roll_no, name, email, password, branch,
       year: year ? parseInt(year) : null,
       section
     })
