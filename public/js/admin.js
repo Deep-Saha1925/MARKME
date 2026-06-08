@@ -1,73 +1,91 @@
+// public/js/admin.js
+
+// ── Auth check ───────────────────────────────
 const token = localStorage.getItem('markme_token');
 const user  = JSON.parse(localStorage.getItem('markme_user') || '{}');
 
-// Redirect if not admin
-if (!token || user.role !== 'admin') window.location.href = '/pages/login.html';
-
-document.getElementById('admin-name').textContent = user.name || 'Admin';
-
-let allStudents = []; // for client-side search
-
-// ─────────────────────────────────────────────
-// Tab switching
-// ─────────────────────────────────────────────
-function switchTab(name) {
-  ['students', 'teachers', 'courses'].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== name);
-  });
-  document.querySelectorAll('.tab').forEach((btn, i) => {
-    btn.classList.toggle('active', ['students','teachers','courses'][i] === name);
-  });
-
-  if (name === 'students') loadStudents();
-  if (name === 'teachers') { loadTeachers(); }
-  if (name === 'courses')  { loadCourses(); loadTeachersForSelect(); }
+if (!token || user.role !== 'admin') {
+  window.location.href = '/pages/login.html';
 }
 
-// ─────────────────────────────────────────────
-// API helper
-// ─────────────────────────────────────────────
-function api(url, options = {}) {
-  return fetch(url, {
+// ── Init ─────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('admin-name').textContent = user.name || 'Admin';
+  loadStudents();
+});
+
+// ── Tab switching ─────────────────────────────
+function switchTab(name, btn) {
+  // Hide all tabs
+  ['students', 'teachers', 'courses'].forEach(t => {
+    document.getElementById('tab-' + t).classList.add('hidden');
+  });
+  // Deactivate all tab buttons
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+
+  // Show selected tab + activate button
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  btn.classList.add('active');
+
+  // Load data for the tab
+  if (name === 'students') loadStudents();
+  if (name === 'teachers') loadTeachers();
+  if (name === 'courses')  { loadCourses(); loadTeachersDropdown(); }
+}
+
+// ── API helper ────────────────────────────────
+async function api(url, options = {}) {
+  const res = await fetch(url, {
     ...options,
     headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options.headers,
-    },
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+      ...(options.headers || {})
+    }
   });
+  const data = await res.json();
+  return { ok: res.ok, status: res.status, data };
 }
 
 // ─────────────────────────────────────────────
 // STUDENTS
 // ─────────────────────────────────────────────
+let allStudents = [];
+
 async function loadStudents() {
-  const res  = await api('/api/admin/students');
-  const data = await res.json();
+  const { ok, data } = await api('/api/admin/students');
+  if (!ok) return showMsg('s-msg', 'error', data.error || 'Failed to load students');
+
   allStudents = data;
-  updateStats(data);
-  renderStudentsTable(data);
-}
 
-function updateStats(data) {
-  const total   = data.length;
+  // Stats
   const pending = data.filter(s => s.password === 'PENDING').length;
-  document.getElementById('stat-total').textContent   = total;
-  document.getElementById('stat-active').textContent  = total - pending;
+  document.getElementById('stat-total').textContent   = data.length;
+  document.getElementById('stat-active').textContent  = data.length - pending;
   document.getElementById('stat-pending').textContent = pending;
+
+  renderTable(data);
 }
 
-function renderStudentsTable(data) {
-  const container = document.getElementById('students-table');
+function filterStudents(q) {
+  const filtered = allStudents.filter(s =>
+    s.name.toLowerCase().includes(q.toLowerCase()) ||
+    s.roll_no.toLowerCase().includes(q.toLowerCase())
+  );
+  renderTable(filtered);
+}
+
+function renderTable(data) {
+  const el = document.getElementById('s-table');
 
   if (!data.length) {
-    container.innerHTML = '<p class="text-muted">No students registered yet.</p>';
+    el.innerHTML = '<p style="color:#73726c;font-size:14px">No students found.</p>';
     return;
   }
 
-  container.innerHTML = `
-    <div class="table-wrap">
-      <table class="data-table">
+  el.innerHTML = `
+    <div style="overflow-x:auto">
+      <table>
         <thead>
           <tr>
             <th>Roll no</th>
@@ -75,7 +93,7 @@ function renderStudentsTable(data) {
             <th>Email</th>
             <th>Branch</th>
             <th>Year</th>
-            <th>Section</th>
+            <th>Sec</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -84,12 +102,12 @@ function renderStudentsTable(data) {
             <tr>
               <td><span class="roll-tag">${s.roll_no}</span></td>
               <td>${s.name}</td>
-              <td class="text-muted">${s.email}</td>
-              <td>${s.branch || '—'}</td>
-              <td>${s.year   || '—'}</td>
+              <td style="color:#73726c">${s.email}</td>
+              <td>${s.branch  || '—'}</td>
+              <td>${s.year    || '—'}</td>
               <td>${s.section || '—'}</td>
               <td>
-                <span class="status-badge ${s.password === 'PENDING' ? 'badge-pending' : 'badge-active'}">
+                <span class="badge ${s.password === 'PENDING' ? 'badge-yellow' : 'badge-green'}">
                   ${s.password === 'PENDING' ? 'Pending' : 'Active'}
                 </span>
               </td>
@@ -101,14 +119,6 @@ function renderStudentsTable(data) {
   `;
 }
 
-function filterStudents() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const filtered = allStudents.filter(s =>
-    s.name.toLowerCase().includes(q) || s.roll_no.toLowerCase().includes(q)
-  );
-  renderStudentsTable(filtered);
-}
-
 async function registerStudent() {
   const roll_no = document.getElementById('s-roll').value.trim();
   const name    = document.getElementById('s-name').value.trim();
@@ -117,50 +127,55 @@ async function registerStudent() {
   const year    = document.getElementById('s-year').value;
   const section = document.getElementById('s-section').value.trim();
 
-  clearMsg('student');
+  clearMsg('s-msg');
 
   if (!roll_no || !name || !email) {
-    showMsg('student', 'error', 'Roll number, name and email are required');
-    return;
+    return showMsg('s-msg', 'error', 'Roll number, name and email are required');
   }
 
-  const res  = await api('/api/auth/register/student', {
+  const btn = document.getElementById('s-btn');
+  btn.textContent = 'Adding...';
+  btn.disabled = true;
+
+  const { ok, data } = await api('/api/auth/register/student', {
     method: 'POST',
-    body: JSON.stringify({ roll_no, name, email, branch, year: year ? parseInt(year) : null, section }),
+    body: JSON.stringify({
+      roll_no, name, email, branch,
+      year: year ? parseInt(year) : null,
+      section
+    })
   });
-  const data = await res.json();
 
-  if (!res.ok) {
-    showMsg('student', 'error', data.error || 'Failed to register student');
-    return;
-  }
+  btn.textContent = 'Add student';
+  btn.disabled = false;
 
-  showMsg('student', 'success', `${name} (${roll_no}) registered successfully`);
-  clearForm(['s-roll','s-name','s-email','s-branch','s-section']);
-  document.getElementById('s-year').value = '';
+  if (!ok) return showMsg('s-msg', 'error', data.error || 'Failed to register');
+
+  showMsg('s-msg', 'success', name + ' (' + roll_no + ') registered!');
+  document.getElementById('s-roll').value    = '';
+  document.getElementById('s-name').value    = '';
+  document.getElementById('s-email').value   = '';
+  document.getElementById('s-branch').value  = '';
+  document.getElementById('s-year').value    = '';
+  document.getElementById('s-section').value = '';
   loadStudents();
 }
 
 // ─────────────────────────────────────────────
-// BULK CSV IMPORT
+// BULK IMPORT
 // ─────────────────────────────────────────────
 let parsedStudents = [];
 
 function previewCSV() {
+  clearMsg('b-msg');
   const raw = document.getElementById('csv-input').value.trim();
-  clearMsg('bulk');
 
-  if (!raw) {
-    showMsg('bulk', 'error', 'Please paste some CSV data first');
-    return;
-  }
+  if (!raw) return showMsg('b-msg', 'error', 'Please paste CSV data first');
 
   const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-
-  // Skip header row if present
   const start = lines[0].toLowerCase().startsWith('roll_no') ? 1 : 0;
-  parsedStudents = [];
 
+  parsedStudents = [];
   for (let i = start; i < lines.length; i++) {
     const cols = lines[i].split(',').map(c => c.trim());
     if (cols.length < 3) continue;
@@ -175,86 +190,88 @@ function previewCSV() {
   }
 
   if (!parsedStudents.length) {
-    showMsg('bulk', 'error', 'No valid rows found in CSV');
-    return;
+    return showMsg('b-msg', 'error', 'No valid rows found');
   }
 
-  // Show preview table
-  const preview = document.getElementById('bulk-preview');
+  // Show preview
+  const preview = document.getElementById('b-preview');
   preview.classList.remove('hidden');
   preview.innerHTML = `
-    <div class="preview-header">${parsedStudents.length} students ready to import</div>
-    <div class="table-wrap" style="max-height:180px;overflow-y:auto">
-      <table class="data-table">
-        <thead><tr><th>Roll no</th><th>Name</th><th>Email</th><th>Branch</th><th>Year</th><th>Sec</th></tr></thead>
-        <tbody>
-          ${parsedStudents.map(s => `
-            <tr>
-              <td>${s.roll_no}</td>
-              <td>${s.name}</td>
-              <td class="text-muted">${s.email}</td>
-              <td>${s.branch || '—'}</td>
-              <td>${s.year   || '—'}</td>
-              <td>${s.section || '—'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+    <div class="preview-box">
+      <div class="preview-title">${parsedStudents.length} students ready to import</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>Roll no</th><th>Name</th><th>Email</th>
+            <th>Branch</th><th>Year</th><th>Sec</th>
+          </tr></thead>
+          <tbody>
+            ${parsedStudents.map(s => `
+              <tr>
+                <td>${s.roll_no}</td>
+                <td>${s.name}</td>
+                <td style="color:#73726c">${s.email}</td>
+                <td>${s.branch  || '—'}</td>
+                <td>${s.year    || '—'}</td>
+                <td>${s.section || '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 
-  document.getElementById('bulk-btn').classList.remove('hidden');
+  document.getElementById('b-import-btn').disabled = false;
 }
 
 async function bulkImport() {
-  const btn = document.getElementById('bulk-btn');
+  clearMsg('b-msg');
+  if (!parsedStudents.length) return;
+
+  const btn = document.getElementById('b-import-btn');
   btn.textContent = 'Importing...';
-  btn.disabled    = true;
-  clearMsg('bulk');
+  btn.disabled = true;
 
-  const res  = await api('/api/auth/register/students/bulk', {
+  const { ok, data } = await api('/api/auth/register/students/bulk', {
     method: 'POST',
-    body:   JSON.stringify({ students: parsedStudents }),
+    body: JSON.stringify({ students: parsedStudents })
   });
-  const data = await res.json();
 
-  if (!res.ok) {
-    showMsg('bulk', 'error', data.error || 'Import failed');
-  } else {
-    showMsg('bulk', 'success',
-      `${data.created.length} imported successfully` +
-      (data.failed.length ? `, ${data.failed.length} skipped (duplicates)` : '')
-    );
-    document.getElementById('csv-input').value = '';
-    document.getElementById('bulk-preview').classList.add('hidden');
-    btn.classList.add('hidden');
-    parsedStudents = [];
-    loadStudents();
-  }
+  btn.textContent = 'Import';
+  btn.disabled = true; // keep disabled after import
 
-  btn.textContent = 'Import all';
-  btn.disabled    = false;
+  if (!ok) return showMsg('b-msg', 'error', data.error || 'Import failed');
+
+  const skipped = data.failed.length
+    ? ', ' + data.failed.length + ' skipped (duplicates)' : '';
+  showMsg('b-msg', 'success', data.created.length + ' students imported' + skipped);
+
+  document.getElementById('csv-input').value = '';
+  document.getElementById('b-preview').classList.add('hidden');
+  parsedStudents = [];
+  loadStudents();
 }
 
 // ─────────────────────────────────────────────
 // TEACHERS
 // ─────────────────────────────────────────────
 async function loadTeachers() {
-  const res  = await api('/api/admin/teachers');
-  const data = await res.json();
+  const { ok, data } = await api('/api/admin/teachers');
+  if (!ok) return;
 
-  const list = document.getElementById('teachers-list');
+  const el = document.getElementById('t-list');
   if (!data.length) {
-    list.innerHTML = '<p class="text-muted">No teachers yet.</p>';
+    el.innerHTML = '<p style="color:#73726c;font-size:14px">No teachers yet.</p>';
     return;
   }
 
-  list.innerHTML = data.map(t => `
-    <div class="list-row">
-      <div class="list-avatar">${t.name.charAt(0)}</div>
+  el.innerHTML = data.map(t => `
+    <div class="list-item">
+      <div class="avatar">${t.name.charAt(0).toUpperCase()}</div>
       <div>
         <div class="list-name">${t.name}</div>
-        <div class="text-muted" style="font-size:12px">${t.email}</div>
+        <div class="list-detail">${t.email}</div>
       </div>
     </div>
   `).join('');
@@ -263,65 +280,69 @@ async function loadTeachers() {
 async function registerTeacher() {
   const name     = document.getElementById('t-name').value.trim();
   const email    = document.getElementById('t-email').value.trim();
-  const password = document.getElementById('t-password').value;
+  const password = document.getElementById('t-pass').value;
 
-  clearMsg('teacher');
+  clearMsg('t-msg');
 
   if (!name || !email || !password) {
-    showMsg('teacher', 'error', 'All fields are required');
-    return;
+    return showMsg('t-msg', 'error', 'All fields are required');
   }
   if (password.length < 8) {
-    showMsg('teacher', 'error', 'Password must be at least 8 characters');
-    return;
+    return showMsg('t-msg', 'error', 'Password must be at least 8 characters');
   }
 
-  const res  = await api('/api/auth/register/teacher', {
+  const btn = document.getElementById('t-btn');
+  btn.textContent = 'Adding...';
+  btn.disabled = true;
+
+  const { ok, data } = await api('/api/auth/register/teacher', {
     method: 'POST',
-    body:   JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password })
   });
-  const data = await res.json();
 
-  if (!res.ok) {
-    showMsg('teacher', 'error', data.error || 'Failed to add teacher');
-    return;
-  }
+  btn.textContent = 'Add teacher';
+  btn.disabled = false;
 
-  showMsg('teacher', 'success', `${name} added successfully`);
-  clearForm(['t-name', 't-email', 't-password']);
+  if (!ok) return showMsg('t-msg', 'error', data.error || 'Failed to add teacher');
+
+  showMsg('t-msg', 'success', name + ' added successfully');
+  document.getElementById('t-name').value = '';
+  document.getElementById('t-email').value = '';
+  document.getElementById('t-pass').value = '';
   loadTeachers();
-  loadTeachersForSelect();
 }
 
 // ─────────────────────────────────────────────
 // COURSES
 // ─────────────────────────────────────────────
-async function loadTeachersForSelect() {
-  const res  = await api('/api/admin/teachers');
-  const data = await res.json();
-  const sel  = document.getElementById('c-teacher');
-  sel.innerHTML = data.length
-    ? data.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
-    : '<option value="">No teachers yet</option>';
+async function loadTeachersDropdown() {
+  const { ok, data } = await api('/api/admin/teachers');
+  const sel = document.getElementById('c-teacher');
+  sel.innerHTML = ok && data.length
+    ? '<option value="">— Select teacher —</option>' +
+      data.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
+    : '<option value="">No teachers yet — add one first</option>';
 }
 
 async function loadCourses() {
-  const res  = await api('/api/admin/courses');
-  const data = await res.json();
-
-  const list = document.getElementById('courses-list');
-  if (!data.length) {
-    list.innerHTML = '<p class="text-muted">No courses yet.</p>';
+  const { ok, data } = await api('/api/admin/courses');
+  const el = document.getElementById('c-list');
+  if (!ok || !data.length) {
+    el.innerHTML = '<p style="color:#73726c;font-size:14px">No courses yet.</p>';
     return;
   }
 
-  list.innerHTML = data.map(c => `
-    <div class="list-row">
+  el.innerHTML = data.map(c => `
+    <div class="list-item">
+      <div class="avatar" style="border-radius:8px;background:#f4f4f0;color:#534AB7;font-size:11px;font-weight:700">
+        ${c.code.slice(0,3)}
+      </div>
       <div>
-        <div class="list-name">${c.name}
+        <div class="list-name">
+          ${c.name}
           <span class="roll-tag" style="margin-left:6px">${c.code}</span>
         </div>
-        <div class="text-muted" style="font-size:12px">${c.teacher_name || 'Unassigned'}</div>
+        <div class="list-detail">${c.teacher_name || 'Unassigned'}</div>
       </div>
     </div>
   `).join('');
@@ -332,59 +353,56 @@ async function addCourse() {
   const code       = document.getElementById('c-code').value.trim();
   const teacher_id = document.getElementById('c-teacher').value;
 
-  clearMsg('course');
+  clearMsg('c-msg');
 
   if (!name || !code) {
-    showMsg('course', 'error', 'Course name and code are required');
-    return;
+    return showMsg('c-msg', 'error', 'Course name and code are required');
   }
 
-  const res  = await api('/api/admin/courses', {
+  const btn = document.getElementById('c-btn');
+  btn.textContent = 'Adding...';
+  btn.disabled = true;
+
+  const { ok, data } = await api('/api/admin/courses', {
     method: 'POST',
-    body:   JSON.stringify({ name, code, teacher_id: teacher_id ? parseInt(teacher_id) : null }),
+    body: JSON.stringify({
+      name, code,
+      teacher_id: teacher_id ? parseInt(teacher_id) : null
+    })
   });
-  const data = await res.json();
 
-  if (!res.ok) {
-    showMsg('course', 'error', data.error || 'Failed to add course');
-    return;
-  }
+  btn.textContent = 'Add course';
+  btn.disabled = false;
 
-  showMsg('course', 'success', `${name} (${code}) added`);
-  clearForm(['c-name', 'c-code']);
+  if (!ok) return showMsg('c-msg', 'error', data.error || 'Failed to add course');
+
+  showMsg('c-msg', 'success', name + ' (' + code + ') added');
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-code').value = '';
   loadCourses();
 }
 
 // ─────────────────────────────────────────────
-// Helpers
+// Message helpers
 // ─────────────────────────────────────────────
-function showMsg(prefix, type, msg) {
-  const el = document.getElementById(`${prefix}-${type}`);
-  el.textContent = msg;
-  el.classList.remove('hidden');
+function showMsg(id, type, text) {
+  const el = document.getElementById(id);
+  el.className = type === 'error' ? 'msg-error' : 'msg-success';
+  el.textContent = text;
+  el.style.display = 'block';
 }
 
-function clearMsg(prefix) {
-  ['error', 'success'].forEach(t => {
-    const el = document.getElementById(`${prefix}-${t}`);
-    if (el) el.classList.add('hidden');
-  });
+function clearMsg(id) {
+  const el = document.getElementById(id);
+  el.textContent = '';
+  el.style.display = 'none';
 }
 
-function clearForm(ids) {
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-}
-
+// ─────────────────────────────────────────────
+// Logout
+// ─────────────────────────────────────────────
 function logout() {
   localStorage.removeItem('markme_token');
   localStorage.removeItem('markme_user');
   window.location.href = '/pages/login.html';
 }
-
-// ─────────────────────────────────────────────
-// Init
-// ─────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', loadStudents);

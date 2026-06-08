@@ -3,40 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MarkMe — Admin Dashboard</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <title>MarkMe — Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f4f0;
+      color: #1a1a18;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: #fff;
+      border-bottom: 1px solid #e0dfd8;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: #534AB7; color: #fff;
+      border-radius: 8px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-text { font-size: 18px; font-weight: 600; }
+    .nav-badge {
+      font-size: 11px; background: #EEEDF8; color: #534AB7;
+      padding: 2px 8px; border-radius: 20px; font-weight: 500;
+    }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-user  { font-size: 14px; color: #73726c; }
+    .btn-signout {
+      padding: 7px 14px; font-size: 13px; cursor: pointer;
+      background: none; border: 1px solid #d3d1c7;
+      border-radius: 8px; color: #3d3d3a;
+    }
+    .btn-signout:hover { background: #f4f4f0; }
+
+    /* ── Tabs ── */
+    .tab-bar {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #e0dfd8;
+      padding: 0 28px;
+    }
+    .tab {
+      padding: 12px 20px; font-size: 14px; font-weight: 500;
+      background: none; border: none; cursor: pointer;
+      color: #73726c; border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab:hover  { color: #1a1a18; }
+    .tab.active { color: #534AB7; border-bottom-color: #534AB7; }
+
+    /* ── Layout ── */
+    .container { max-width: 1020px; margin: 28px auto; padding: 0 20px; }
+    .hidden    { display: none !important; }
+
+    /* ── Stats ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e0dfd8;
+      border-radius: 12px;
+      padding: 18px 22px;
+    }
+    .stat-num   { font-size: 28px; font-weight: 600; color: #534AB7; }
+    .stat-label { font-size: 13px; color: #73726c; margin-top: 2px; }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border: 1px solid #e0dfd8;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .card p  { font-size: 13px; color: #73726c; margin-bottom: 18px; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Form fields ── */
+    .field       { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 500;
+                   color: #3d3d3a; margin-bottom: 5px; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid #d3d1c7; border-radius: 8px;
+      font-size: 14px; background: #fafaf8; outline: none;
+      font-family: inherit; transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: #534AB7; background: #fff;
+    }
+    .field textarea { resize: vertical; font-family: monospace; font-size: 12px; }
+
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      width: 100%; padding: 10px; font-size: 14px; font-weight: 500;
+      background: #534AB7; color: #fff; border: none;
+      border-radius: 8px; cursor: pointer; margin-top: 4px;
+    }
+    .btn-primary:hover    { background: #3C3489; }
+    .btn-primary:disabled { background: #9c9a92; cursor: not-allowed; }
+
+    .btn-secondary {
+      padding: 10px 18px; font-size: 14px; font-weight: 500;
+      background: #EEEDF8; color: #534AB7; border: none;
+      border-radius: 8px; cursor: pointer;
+    }
+    .btn-secondary:hover { background: #DDD9F3; }
+
+    /* ── Messages ── */
+    .msg-error {
+      padding: 10px 14px; border-radius: 8px; font-size: 13px;
+      margin-bottom: 14px;
+      background: #FCEBEB; color: #791F1F; border: 1px solid #f09595;
+    }
+    .msg-success {
+      padding: 10px 14px; border-radius: 8px; font-size: 13px;
+      margin-bottom: 14px;
+      background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5;
+    }
+
+    /* ── CSV hint box ── */
+    .csv-hint {
+      background: #f4f4f0; border: 1px solid #e0dfd8;
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+      font-size: 12px; color: #534AB7; font-family: monospace; line-height: 1.9;
+    }
+    .csv-hint-title { font-family: system-ui; font-weight: 600;
+                      color: #3d3d3a; margin-bottom: 4px; font-size: 12px; }
+
+    /* ── Table ── */
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 10px 12px;
+      color: #73726c; font-weight: 500;
+      border-bottom: 1px solid #e0dfd8; white-space: nowrap;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0efe8; }
+    tr:last-child td  { border-bottom: none; }
+    tr:hover td { background: #fafaf8; }
+
+    .roll-tag {
+      background: #EEEDF8; color: #534AB7; font-size: 11px;
+      font-weight: 600; padding: 2px 7px; border-radius: 4px;
+      font-family: monospace;
+    }
+    .badge {
+      font-size: 11px; font-weight: 500;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .badge-green  { background: #E1F5EE; color: #0F6E56; }
+    .badge-yellow { background: #FAEEDA; color: #854F0B; }
+
+    /* ── List rows (teachers/courses) ── */
+    .list-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 0; border-bottom: 1px solid #f0efe8;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #EEEDF8; color: #534AB7;
+      font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .list-name   { font-size: 14px; font-weight: 500; }
+    .list-detail { font-size: 12px; color: #73726c; margin-top: 1px; }
+
+    /* ── Search ── */
+    .table-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 16px;
+    }
+    .search-input {
+      padding: 8px 12px; border: 1px solid #d3d1c7;
+      border-radius: 8px; font-size: 13px; width: 220px; outline: none;
+    }
+    .search-input:focus { border-color: #534AB7; }
+
+    /* ── Preview ── */
+    .preview-box {
+      background: #f4f4f0; border: 1px solid #e0dfd8;
+      border-radius: 8px; padding: 10px; margin-bottom: 14px;
+      max-height: 200px; overflow-y: auto;
+    }
+    .preview-title {
+      font-size: 13px; font-weight: 500; color: #0F6E56; margin-bottom: 8px;
+    }
+    .btn-row { display: flex; gap: 10px; }
+  </style>
 </head>
 <body>
 
-  <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-logo">
-      <span class="logo-mark">M</span>
+      <div class="logo-mark">M</div>
       <span class="logo-text">MarkMe</span>
       <span class="nav-badge">Admin</span>
     </div>
     <div class="nav-right">
       <span id="admin-name" class="nav-user"></span>
-      <button class="btn-ghost" onclick="logout()">Sign out</button>
+      <button class="btn-signout" onclick="logout()">Sign out</button>
     </div>
   </nav>
 
-  <!-- Tab bar -->
   <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('students')">Students</button>
-    <button class="tab"        onclick="switchTab('teachers')">Teachers</button>
-    <button class="tab"        onclick="switchTab('courses')">Courses</button>
+    <button class="tab active" onclick="switchTab('students', this)">Students</button>
+    <button class="tab"        onclick="switchTab('teachers', this)">Teachers</button>
+    <button class="tab"        onclick="switchTab('courses',  this)">Courses</button>
   </div>
 
   <main class="container">
 
-    <!-- ══════════════════════════════════════
-         STUDENTS TAB
-    ══════════════════════════════════════ -->
+    <!-- ══ STUDENTS ══ -->
     <div id="tab-students">
 
-      <!-- Stats row -->
-      <div class="stats-row" id="stats-row">
+      <div class="stats-row">
         <div class="stat-card">
           <div class="stat-num" id="stat-total">—</div>
           <div class="stat-label">Total students</div>
@@ -47,24 +251,21 @@
         </div>
         <div class="stat-card">
           <div class="stat-num" id="stat-pending">—</div>
-          <div class="stat-label">Pending activation</div>
+          <div class="stat-label">Pending setup</div>
         </div>
       </div>
 
       <div class="two-col">
 
-        <!-- Register single student -->
+        <!-- Single register -->
         <div class="card">
           <h2>Register student</h2>
-          <p class="text-muted">Add one student manually</p>
-
-          <div id="student-error"   class="error-box   hidden"></div>
-          <div id="student-success" class="success-box hidden"></div>
-
+          <p>Add one student manually</p>
+          <div id="s-msg"></div>
           <div class="field">
             <label>Roll number</label>
-            <input type="text" id="s-roll" placeholder="e.g. 22CS045"
-              oninput="this.value = this.value.toUpperCase()">
+            <input type="text" id="s-roll" placeholder="22CS045"
+              oninput="this.value=this.value.toUpperCase()">
           </div>
           <div class="field">
             <label>Full name</label>
@@ -74,7 +275,7 @@
             <label>College email</label>
             <input type="email" id="s-email" placeholder="riya@college.edu">
           </div>
-          <div class="form-row">
+          <div class="row-3">
             <div class="field">
               <label>Branch</label>
               <input type="text" id="s-branch" placeholder="CSE">
@@ -90,73 +291,59 @@
             <div class="field">
               <label>Section</label>
               <input type="text" id="s-section" placeholder="B"
-                oninput="this.value = this.value.toUpperCase()">
+                oninput="this.value=this.value.toUpperCase()">
             </div>
           </div>
-
-          <button onclick="registerStudent()">Add student</button>
+          <button class="btn-primary" id="s-btn" onclick="registerStudent()">
+            Add student
+          </button>
         </div>
 
         <!-- Bulk import -->
         <div class="card">
           <h2>Bulk import</h2>
-          <p class="text-muted">Paste a CSV to register many students at once</p>
-
-          <div id="bulk-error"   class="error-box   hidden"></div>
-          <div id="bulk-success" class="success-box hidden"></div>
-
-          <div class="csv-format">
-            <div class="csv-format-title">CSV format</div>
-            <code>roll_no,name,email,branch,year,section</code><br>
-            <code>22CS045,Riya Sharma,riya@college.edu,CSE,3,B</code><br>
-            <code>22CS046,Arjun Mehta,arjun@college.edu,CSE,3,B</code>
+          <p>Paste CSV to register many students at once</p>
+          <div id="b-msg"></div>
+          <div class="csv-hint">
+            <div class="csv-hint-title">CSV format (header optional)</div>
+            roll_no,name,email,branch,year,section<br>
+            22CS045,Riya Sharma,riya@college.edu,CSE,3,B<br>
+            22CS046,Arjun Mehta,arjun@college.edu,CSE,3,A
           </div>
-
           <div class="field">
-            <label>Paste CSV here</label>
-            <textarea id="csv-input" rows="7"
-              placeholder="roll_no,name,email,branch,year,section&#10;22CS045,Riya Sharma,riya@college.edu,CSE,3,B"></textarea>
+            <label>Paste CSV</label>
+            <textarea id="csv-input" rows="6" placeholder="Paste your CSV here..."></textarea>
           </div>
-
-          <div id="bulk-preview" class="hidden"></div>
-
-          <div style="display:flex;gap:10px">
+          <div id="b-preview" class="hidden"></div>
+          <div class="btn-row">
             <button class="btn-secondary" onclick="previewCSV()">Preview</button>
-            <button id="bulk-btn" onclick="bulkImport()" class="hidden">Import all</button>
+            <button class="btn-primary" id="b-import-btn" style="width:auto;padding:10px 18px"
+              onclick="bulkImport()" disabled>Import</button>
           </div>
         </div>
 
       </div>
 
       <!-- Students table -->
-      <div class="card" style="margin-top:0">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="card">
+        <div class="table-header">
           <h2 style="margin:0">All students</h2>
-          <input type="text" id="search-input" placeholder="Search by name or roll no..."
-            oninput="filterStudents()" style="width:240px;padding:8px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px">
+          <input class="search-input" placeholder="Search name or roll no..."
+            oninput="filterStudents(this.value)">
         </div>
-        <div id="students-table">
-          <p class="text-muted">Loading...</p>
-        </div>
+        <div id="s-table"><p style="color:#73726c;font-size:14px">Loading...</p></div>
       </div>
 
     </div>
 
-    <!-- ══════════════════════════════════════
-         TEACHERS TAB
-    ══════════════════════════════════════ -->
+    <!-- ══ TEACHERS ══ -->
     <div id="tab-teachers" class="hidden">
-
       <div class="two-col">
 
-        <!-- Add teacher -->
         <div class="card">
           <h2>Add teacher</h2>
-          <p class="text-muted">Create a teacher account</p>
-
-          <div id="teacher-error"   class="error-box   hidden"></div>
-          <div id="teacher-success" class="success-box hidden"></div>
-
+          <p>Create a new teacher account</p>
+          <div id="t-msg"></div>
           <div class="field">
             <label>Full name</label>
             <input type="text" id="t-name" placeholder="Prof. Sharma">
@@ -167,38 +354,30 @@
           </div>
           <div class="field">
             <label>Password</label>
-            <input type="password" id="t-password" placeholder="Min. 8 characters">
+            <input type="password" id="t-pass" placeholder="Min. 8 characters">
           </div>
-
-          <button onclick="registerTeacher()">Add teacher</button>
+          <button class="btn-primary" id="t-btn" onclick="registerTeacher()">
+            Add teacher
+          </button>
         </div>
 
-        <!-- Teachers list -->
         <div class="card">
           <h2>All teachers</h2>
-          <div id="teachers-list">
-            <p class="text-muted">Loading...</p>
-          </div>
+          <p> </p>
+          <div id="t-list"><p style="color:#73726c;font-size:14px">Loading...</p></div>
         </div>
 
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════
-         COURSES TAB
-    ══════════════════════════════════════ -->
+    <!-- ══ COURSES ══ -->
     <div id="tab-courses" class="hidden">
-
       <div class="two-col">
 
-        <!-- Add course -->
         <div class="card">
           <h2>Add course</h2>
-          <p class="text-muted">Create and assign a course to a teacher</p>
-
-          <div id="course-error"   class="error-box   hidden"></div>
-          <div id="course-success" class="success-box hidden"></div>
-
+          <p>Create and assign a course to a teacher</p>
+          <div id="c-msg"></div>
           <div class="field">
             <label>Course name</label>
             <input type="text" id="c-name" placeholder="Data Structures">
@@ -206,24 +385,21 @@
           <div class="field">
             <label>Course code</label>
             <input type="text" id="c-code" placeholder="CS301"
-              oninput="this.value = this.value.toUpperCase()">
+              oninput="this.value=this.value.toUpperCase()">
           </div>
           <div class="field">
             <label>Assign teacher</label>
-            <select id="c-teacher">
-              <option value="">Loading teachers...</option>
-            </select>
+            <select id="c-teacher"></select>
           </div>
-
-          <button onclick="addCourse()">Add course</button>
+          <button class="btn-primary" id="c-btn" onclick="addCourse()">
+            Add course
+          </button>
         </div>
 
-        <!-- Courses list -->
         <div class="card">
           <h2>All courses</h2>
-          <div id="courses-list">
-            <p class="text-muted">Loading...</p>
-          </div>
+          <p> </p>
+          <div id="c-list"><p style="color:#73726c;font-size:14px">Loading...</p></div>
         </div>
 
       </div>

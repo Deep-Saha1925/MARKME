@@ -172,3 +172,9 @@ textarea {
   transition: border-color 0.15s;
 }
 textarea:focus { border-color: #534AB7; background: #fff; }
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
