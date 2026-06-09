@@ -11,7 +11,7 @@
     /* ── Navbar ── */
     .navbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: #fff; border-bottom: 1px solid #e0dfd8; }
     .nav-logo { display: flex; align-items: center; gap: 8px; }
-    .logo-mark { width: 32px; height: 32px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .logo-mark { width: 32px; height: 32px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 16px; }
     .logo-text { font-size: 18px; font-weight: 600; }
     .nav-badge { font-size: 11px; background: #EEEDF8; color: #534AB7; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
     .nav-right { display: flex; align-items: center; gap: 12px; }
@@ -19,103 +19,136 @@
     .btn-signout { padding: 7px 14px; font-size: 13px; cursor: pointer; background: none; border: 1px solid #d3d1c7; border-radius: 8px; color: #3d3d3a; }
     .btn-signout:hover { background: #f4f4f0; }
 
-    /* ── Tabs ── */
-    .tab-bar { display: flex; background: #fff; border-bottom: 1px solid #e0dfd8; padding: 0 28px; }
-    .tab { padding: 12px 20px; font-size: 14px; font-weight: 500; background: none; border: none; cursor: pointer; color: #73726c; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-    .tab:hover  { color: #1a1a18; }
-    .tab.active { color: #534AB7; border-bottom-color: #534AB7; }
+    /* ── Sidebar + Content layout ── */
+    .layout { display: flex; min-height: calc(100vh - 57px); }
+    .sidebar { width: 220px; background: #fff; border-right: 1px solid #e0dfd8; padding: 20px 12px; flex-shrink: 0; }
+    .sidebar-label { font-size: 11px; font-weight: 600; color: #9c9a92; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 10px; margin-bottom: 6px; margin-top: 16px; }
+    .sidebar-label:first-child { margin-top: 0; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: #3d3d3a; border: none; background: none; width: 100%; text-align: left; transition: background 0.12s; }
+    .nav-item:hover  { background: #f4f4f0; }
+    .nav-item.active { background: #EEEDF8; color: #534AB7; }
+    .nav-item .icon  { font-size: 16px; width: 20px; text-align: center; }
+    .nav-badge-count { margin-left: auto; font-size: 11px; background: #534AB7; color: #fff; padding: 1px 7px; border-radius: 20px; }
 
-    /* ── Layout ── */
-    .container { max-width: 1020px; margin: 28px auto; padding: 0 20px; }
-    .hidden    { display: none !important; }
+    /* ── Main content ── */
+    .content { flex: 1; padding: 28px; overflow-y: auto; }
+    .hidden { display: none !important; }
+
+    /* ── Page header ── */
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-title  { font-size: 20px; font-weight: 600; }
+    .page-sub    { font-size: 13px; color: #73726c; margin-top: 2px; }
 
     /* ── Stats ── */
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
-    .stat-card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 18px 22px; }
-    .stat-num  { font-size: 28px; font-weight: 600; color: #534AB7; }
-    .stat-label { font-size: 13px; color: #73726c; margin-top: 2px; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 16px 20px; }
+    .stat-num   { font-size: 26px; font-weight: 600; color: #534AB7; }
+    .stat-label { font-size: 12px; color: #73726c; margin-top: 2px; }
 
-    /* ── Cards ── */
-    .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-    .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-    .card p  { font-size: 13px; color: #73726c; margin-bottom: 18px; }
+    /* ── Card ── */
+    .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 22px; margin-bottom: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+    .card-title  { font-size: 15px; font-weight: 600; }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .search-box { position: relative; }
+    .search-box input { padding: 8px 12px 8px 32px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; width: 220px; outline: none; background: #fafaf8; }
+    .search-box input:focus { border-color: #534AB7; background: #fff; }
+    .search-box::before { content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; }
+    .select-sm { padding: 8px 10px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; background: #fafaf8; outline: none; cursor: pointer; }
+    .select-sm:focus { border-color: #534AB7; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 12px; color: #73726c; font-weight: 500; border-bottom: 1px solid #e0dfd8; white-space: nowrap; user-select: none; }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { color: #1a1a18; }
+    th .sort-icon { margin-left: 4px; opacity: 0.4; font-size: 11px; }
+    th.sort-asc .sort-icon::after  { content: '▲'; opacity: 1; }
+    th.sort-desc .sort-icon::after { content: '▼'; opacity: 1; }
+    th .sort-icon::after { content: '⇅'; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0efe8; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafaf8; }
+
+    /* ── Pagination ── */
+    .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 10px; }
+    .pagination-info { font-size: 13px; color: #73726c; }
+    .pagination-btns { display: flex; gap: 4px; }
+    .pg-btn { padding: 6px 10px; font-size: 13px; border: 1px solid #d3d1c7; background: #fff; border-radius: 6px; cursor: pointer; min-width: 34px; text-align: center; }
+    .pg-btn:hover:not(:disabled) { background: #EEEDF8; border-color: #534AB7; color: #534AB7; }
+    .pg-btn.active { background: #534AB7; color: #fff; border-color: #534AB7; }
+    .pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Badges ── */
+    .roll-tag { background: #EEEDF8; color: #534AB7; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; font-family: monospace; }
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+    .badge-green  { background: #E1F5EE; color: #0F6E56; }
+    .badge-yellow { background: #FAEEDA; color: #854F0B; }
+    .badge-blue   { background: #E0EDFB; color: #185FA5; }
+
+    /* ── Form ── */
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
-
-    /* ── Form fields ── */
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } .stats-row { grid-template-columns: 1fr 1fr; } }
     .field { margin-bottom: 14px; }
     .field label { display: block; font-size: 13px; font-weight: 500; color: #3d3d3a; margin-bottom: 5px; }
-    .field input, .field select, .field textarea {
-      width: 100%; padding: 9px 12px; border: 1px solid #d3d1c7; border-radius: 8px;
-      font-size: 14px; background: #fafaf8; outline: none; font-family: inherit; transition: border-color 0.15s;
-    }
+    .field input, .field select, .field textarea { width: 100%; padding: 9px 12px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 14px; background: #fafaf8; outline: none; font-family: inherit; transition: border-color 0.15s; }
     .field input:focus, .field select:focus, .field textarea:focus { border-color: #534AB7; background: #fff; }
     .field textarea { resize: vertical; font-family: monospace; font-size: 12px; }
+    .field-hint { font-size: 11px; color: #9c9a92; margin-top: 3px; }
     .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
     /* ── Buttons ── */
-    .btn-primary { width: 100%; padding: 10px; font-size: 14px; font-weight: 500; background: #534AB7; color: #fff; border: none; border-radius: 8px; cursor: pointer; margin-top: 4px; }
+    .btn-primary   { width: 100%; padding: 10px; font-size: 14px; font-weight: 500; background: #534AB7; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
     .btn-primary:hover    { background: #3C3489; }
     .btn-primary:disabled { background: #9c9a92; cursor: not-allowed; }
-    .btn-secondary { padding: 10px 18px; font-size: 14px; font-weight: 500; background: #EEEDF8; color: #534AB7; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-secondary { padding: 9px 16px; font-size: 13px; font-weight: 500; background: #EEEDF8; color: #534AB7; border: none; border-radius: 8px; cursor: pointer; }
     .btn-secondary:hover { background: #DDD9F3; }
-    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; font-weight: 500; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-sm-danger { background: #FCEBEB; color: #791F1F; }
+    .btn-sm-danger:hover { background: #f9d0d0; }
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
 
     /* ── Messages ── */
     .msg-error   { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; background: #FCEBEB; color: #791F1F; border: 1px solid #f09595; }
     .msg-success { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5; }
 
     /* ── Import toggle ── */
-    .import-toggle { display: flex; gap: 0; margin-bottom: 14px; border: 1px solid #d3d1c7; border-radius: 8px; overflow: hidden; }
-    .toggle-btn { flex: 1; padding: 8px; font-size: 13px; font-weight: 500; background: none; border: none; cursor: pointer; color: #73726c; transition: all 0.15s; }
+    .import-toggle { display: flex; margin-bottom: 14px; border: 1px solid #d3d1c7; border-radius: 8px; overflow: hidden; }
+    .toggle-btn { flex: 1; padding: 8px; font-size: 13px; font-weight: 500; background: none; border: none; cursor: pointer; color: #73726c; }
     .toggle-btn.active { background: #534AB7; color: #fff; }
     .toggle-btn:not(.active):hover { background: #f4f4f0; }
 
-    /* ── File drop zone ── */
-    .drop-zone {
-      border: 2px dashed #d3d1c7; border-radius: 10px;
-      padding: 28px 20px; text-align: center; cursor: pointer;
-      transition: all 0.15s; margin-bottom: 14px; background: #fafaf8;
-    }
+    /* ── Drop zone ── */
+    .drop-zone { border: 2px dashed #d3d1c7; border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 14px; background: #fafaf8; }
     .drop-zone:hover, .drop-zone.drag-over { border-color: #534AB7; background: #EEEDF8; }
     .drop-zone input[type="file"] { display: none; }
-    .drop-icon  { font-size: 28px; margin-bottom: 8px; }
-    .drop-label { font-size: 14px; font-weight: 500; color: #3d3d3a; margin-bottom: 4px; }
-    .drop-hint  { font-size: 12px; color: #9c9a92; }
-    .drop-filename { font-size: 13px; color: #534AB7; font-weight: 500; margin-top: 8px; }
+    .drop-icon { font-size: 24px; margin-bottom: 6px; }
+    .drop-label { font-size: 13px; font-weight: 500; color: #3d3d3a; margin-bottom: 3px; }
+    .drop-hint  { font-size: 11px; color: #9c9a92; }
+    .drop-filename { font-size: 12px; color: #534AB7; font-weight: 500; margin-top: 6px; }
 
     /* ── CSV hint ── */
     .csv-hint { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #534AB7; font-family: monospace; line-height: 1.9; }
     .csv-hint-title { font-family: system-ui; font-weight: 600; color: #3d3d3a; margin-bottom: 4px; font-size: 12px; }
 
-    /* ── Table ── */
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { text-align: left; padding: 10px 12px; color: #73726c; font-weight: 500; border-bottom: 1px solid #e0dfd8; white-space: nowrap; }
-    td { padding: 10px 12px; border-bottom: 1px solid #f0efe8; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafaf8; }
+    /* ── Preview ── */
+    .preview-box { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px; margin-bottom: 14px; max-height: 180px; overflow-y: auto; }
+    .preview-title { font-size: 13px; font-weight: 500; color: #0F6E56; margin-bottom: 8px; }
+    .preview-note  { font-size: 12px; color: #73726c; margin-top: 8px; }
 
-    .roll-tag { background: #EEEDF8; color: #534AB7; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; font-family: monospace; }
-    .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
-    .badge-green  { background: #E1F5EE; color: #0F6E56; }
-    .badge-yellow { background: #FAEEDA; color: #854F0B; }
-
-    /* ── List rows ── */
-    .list-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f0efe8; }
+    /* ── List items ── */
+    .list-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0efe8; }
     .list-item:last-child { border-bottom: none; }
     .avatar { width: 34px; height: 34px; border-radius: 50%; background: #EEEDF8; color: #534AB7; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .list-name   { font-size: 14px; font-weight: 500; }
     .list-detail { font-size: 12px; color: #73726c; margin-top: 1px; }
 
-    /* ── Search ── */
-    .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .search-input { padding: 8px 12px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; width: 220px; outline: none; }
-    .search-input:focus { border-color: #534AB7; }
-
-    /* ── Preview ── */
-    .preview-box { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px; margin-bottom: 14px; max-height: 200px; overflow-y: auto; }
-    .preview-title { font-size: 13px; font-weight: 500; color: #0F6E56; margin-bottom: 8px; }
-    .preview-note  { font-size: 12px; color: #73726c; margin-top: 8px; }
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 40px 20px; color: #73726c; font-size: 14px; }
+    .empty-icon  { font-size: 32px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -132,237 +165,266 @@
     </div>
   </nav>
 
-  <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('students', this)">Students</button>
-    <button class="tab"        onclick="switchTab('teachers', this)">Teachers</button>
-    <button class="tab"        onclick="switchTab('courses',  this)">Courses</button>
-  </div>
+  <div class="layout">
 
-  <main class="container">
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-label">Overview</div>
+      <button class="nav-item active" onclick="showPage('dashboard', this)">
+        <span class="icon">📊</span> Dashboard
+      </button>
 
-    <!-- ══ STUDENTS TAB ══ -->
-    <div id="tab-students">
+      <div class="sidebar-label">Manage</div>
+      <button class="nav-item" onclick="showPage('students', this)">
+        <span class="icon">🎓</span> Students
+        <span class="nav-badge-count" id="sb-students">0</span>
+      </button>
+      <button class="nav-item" onclick="showPage('teachers', this)">
+        <span class="icon">👨‍🏫</span> Teachers
+        <span class="nav-badge-count" id="sb-teachers">0</span>
+      </button>
+      <button class="nav-item" onclick="showPage('courses', this)">
+        <span class="icon">📚</span> Courses
+        <span class="nav-badge-count" id="sb-courses">0</span>
+      </button>
 
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total students</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-active">—</div><div class="stat-label">Activated</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending setup</div></div>
-      </div>
+      <div class="sidebar-label">Import</div>
+      <button class="nav-item" onclick="showPage('import', this)">
+        <span class="icon">📥</span> Bulk import
+      </button>
+    </aside>
 
-      <div class="two-col">
+    <!-- ── Main content ── -->
+    <main class="content">
 
-        <!-- Single register -->
-        <div class="card">
-          <h2>Register student</h2>
-          <p>Add one student manually</p>
-          <div id="s-msg"></div>
-          <div class="field"><label>Roll number</label>
-            <input type="text" id="s-roll" placeholder="22CS045" oninput="this.value=this.value.toUpperCase()">
+      <!-- ══ DASHBOARD ══ -->
+      <div id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-sub">Overview of MarkMe</div>
           </div>
-          <div class="field"><label>Full name</label>
-            <input type="text" id="s-name" placeholder="Riya Sharma">
-          </div>
-          <div class="field"><label>College email</label>
-            <input type="email" id="s-email" placeholder="riya@college.edu">
-          </div>
-          <div class="field"><label>Password <span style="color:#9c9a92;font-weight:400">(leave blank → student sets own)</span></label>
-            <input type="password" id="s-password" placeholder="Optional">
-          </div>
-          <div class="row-3">
-            <div class="field"><label>Branch</label><input type="text" id="s-branch" placeholder="CSE"></div>
-            <div class="field"><label>Year</label>
-              <select id="s-year"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
-            </div>
-            <div class="field"><label>Section</label><input type="text" id="s-section" placeholder="B" oninput="this.value=this.value.toUpperCase()"></div>
-          </div>
-          <button class="btn-primary" id="s-btn" onclick="registerStudent()">Add student</button>
         </div>
 
-        <!-- Bulk import students -->
-        <div class="card">
-          <h2>Bulk import students</h2>
-          <p>Upload a file or paste CSV to register many at once</p>
-          <div id="b-msg"></div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="dash-students">—</div><div class="stat-label">Total students</div></div>
+          <div class="stat-card"><div class="stat-num" id="dash-active">—</div><div class="stat-label">Activated</div></div>
+          <div class="stat-card"><div class="stat-num" id="dash-teachers">—</div><div class="stat-label">Teachers</div></div>
+          <div class="stat-card"><div class="stat-num" id="dash-courses">—</div><div class="stat-label">Courses</div></div>
+        </div>
 
-          <!-- Toggle: file vs paste -->
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent students</div>
+              <button class="btn-secondary" onclick="showPage('students', document.querySelector('.nav-item:nth-child(4)'))">View all</button>
+            </div>
+            <div id="dash-recent-students"><div class="empty-state"><div class="empty-icon">🎓</div>No students yet</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Teachers</div>
+              <button class="btn-secondary" onclick="showPage('teachers', document.querySelector('.nav-item:nth-child(5)'))">View all</button>
+            </div>
+            <div id="dash-teacher-list"><div class="empty-state"><div class="empty-icon">👨‍🏫</div>No teachers yet</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STUDENTS ══ -->
+      <div id="page-students" class="hidden">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Students</div>
+            <div class="page-sub">Manage student accounts</div>
+          </div>
+          <button class="btn-secondary" onclick="showPage('import', document.querySelector('.nav-item:nth-child(8)'))">+ Bulk import</button>
+        </div>
+
+        <!-- Add student form (collapsible) -->
+        <div class="card" id="add-student-card">
+          <div class="card-header" style="cursor:pointer;margin-bottom:0" onclick="toggleAddForm()">
+            <div class="card-title">➕ Add new student</div>
+            <span id="add-form-toggle" style="font-size:12px;color:#73726c">Show ▼</span>
+          </div>
+          <div id="add-student-form" class="hidden" style="margin-top:18px">
+            <div id="s-msg"></div>
+            <div class="two-col" style="gap:14px">
+              <div class="field"><label>Roll number</label>
+                <input type="text" id="s-roll" placeholder="22CS045" oninput="this.value=this.value.toUpperCase()">
+              </div>
+              <div class="field"><label>Full name</label>
+                <input type="text" id="s-name" placeholder="Riya Sharma">
+              </div>
+              <div class="field"><label>College email</label>
+                <input type="email" id="s-email" placeholder="riya@college.edu">
+              </div>
+              <div class="field"><label>Password <span class="field-hint">(optional — blank = student sets own)</span></label>
+                <input type="password" id="s-password" placeholder="Optional">
+              </div>
+            </div>
+            <div class="row-3" style="gap:10px;margin-bottom:14px">
+              <div class="field" style="margin:0"><label>Branch</label><input type="text" id="s-branch" placeholder="CSE"></div>
+              <div class="field" style="margin:0"><label>Year</label>
+                <select id="s-year"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+              </div>
+              <div class="field" style="margin:0"><label>Section</label><input type="text" id="s-section" placeholder="B" oninput="this.value=this.value.toUpperCase()"></div>
+            </div>
+            <button class="btn-primary" id="s-btn" onclick="registerStudent()" style="width:auto;padding:10px 24px">Add student</button>
+          </div>
+        </div>
+
+        <!-- Students table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All students</div>
+            <div class="toolbar">
+              <div class="search-box">
+                <input type="text" placeholder="Search name or roll no..." oninput="searchStudents(this.value)" id="student-search">
+              </div>
+              <select class="select-sm" onchange="filterByStatus(this.value)">
+                <option value="">All status</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select class="select-sm" onchange="changePageSize(parseInt(this.value))">
+                <option value="10">10 / page</option>
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="students-table">
+              <thead>
+                <tr>
+                  <th class="sortable" onclick="sortBy('roll_no')">Roll no <span class="sort-icon"></span></th>
+                  <th class="sortable" onclick="sortBy('name')">Name <span class="sort-icon"></span></th>
+                  <th>Email</th>
+                  <th class="sortable" onclick="sortBy('branch')">Branch <span class="sort-icon"></span></th>
+                  <th class="sortable" onclick="sortBy('year')">Year <span class="sort-icon"></span></th>
+                  <th>Sec</th>
+                  <th class="sortable" onclick="sortBy('status')">Status <span class="sort-icon"></span></th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <div class="pagination-info" id="pagination-info"></div>
+            <div class="pagination-btns" id="pagination-btns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TEACHERS ══ -->
+      <div id="page-teachers" class="hidden">
+        <div class="page-header">
+          <div><div class="page-title">Teachers</div><div class="page-sub">Manage teacher accounts</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Add teacher</div></div>
+            <div id="t-msg"></div>
+            <div class="field"><label>Full name</label><input type="text" id="t-name" placeholder="Prof. Sharma"></div>
+            <div class="field"><label>Email</label><input type="email" id="t-email" placeholder="sharma@college.edu"></div>
+            <div class="field"><label>Password</label><input type="password" id="t-pass" placeholder="Min. 8 characters"></div>
+            <button class="btn-primary" id="t-btn" onclick="registerTeacher()">Add teacher</button>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">All teachers</div></div>
+            <div id="t-list"><div class="empty-state"><div class="empty-icon">👨‍🏫</div>No teachers yet</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ COURSES ══ -->
+      <div id="page-courses" class="hidden">
+        <div class="page-header">
+          <div><div class="page-title">Courses</div><div class="page-sub">Manage courses and assignments</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Add course</div></div>
+            <div id="c-msg"></div>
+            <div class="field"><label>Course name</label><input type="text" id="c-name" placeholder="Data Structures"></div>
+            <div class="field"><label>Course code</label><input type="text" id="c-code" placeholder="CS301" oninput="this.value=this.value.toUpperCase()"></div>
+            <div class="field"><label>Assign teacher</label><select id="c-teacher"></select></div>
+            <button class="btn-primary" id="c-btn" onclick="addCourse()">Add course</button>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">All courses</div></div>
+            <div id="c-list"><div class="empty-state"><div class="empty-icon">📚</div>No courses yet</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BULK IMPORT ══ -->
+      <div id="page-import" class="hidden">
+        <div class="page-header">
+          <div><div class="page-title">Bulk import</div><div class="page-sub">Import students, teachers or courses from CSV or Excel</div></div>
+        </div>
+
+        <!-- Import type selector -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header" style="margin-bottom:0">
+            <div class="card-title">What are you importing?</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn-secondary active-type" id="import-type-students" onclick="switchImportType('students')" style="border:2px solid #534AB7">🎓 Students</button>
+            <button class="btn-secondary" id="import-type-teachers" onclick="switchImportType('teachers')" style="border:2px solid transparent">👨‍🏫 Teachers</button>
+            <button class="btn-secondary" id="import-type-courses"  onclick="switchImportType('courses')"  style="border:2px solid transparent">📚 Courses</button>
+          </div>
+        </div>
+
+        <!-- Import panel -->
+        <div class="card">
+          <div id="import-msg"></div>
+
           <div class="import-toggle">
-            <button class="toggle-btn active" id="s-toggle-file" onclick="switchImportMode('students','file')">📁 Upload file</button>
-            <button class="toggle-btn"        id="s-toggle-paste" onclick="switchImportMode('students','paste')">📋 Paste CSV</button>
+            <button class="toggle-btn active" id="imp-toggle-file"  onclick="switchImportMode('file')">📁 Upload file</button>
+            <button class="toggle-btn"        id="imp-toggle-paste" onclick="switchImportMode('paste')">📋 Paste CSV</button>
           </div>
 
           <!-- File upload -->
-          <div id="s-file-area">
-            <div class="drop-zone" id="s-drop-zone" onclick="document.getElementById('s-file-input').click()"
-              ondragover="handleDragOver(event,'s-drop-zone')" ondragleave="handleDragLeave('s-drop-zone')"
-              ondrop="handleDrop(event,'students')">
-              <input type="file" id="s-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event,'students')">
+          <div id="imp-file-area">
+            <div class="drop-zone" id="imp-drop-zone"
+              onclick="document.getElementById('imp-file-input').click()"
+              ondragover="handleDragOver(event,'imp-drop-zone')"
+              ondragleave="handleDragLeave('imp-drop-zone')"
+              ondrop="handleDrop(event)">
+              <input type="file" id="imp-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
               <div class="drop-icon">📂</div>
               <div class="drop-label">Click to upload or drag & drop</div>
               <div class="drop-hint">Supports CSV, XLSX, XLS</div>
-              <div class="drop-filename" id="s-filename"></div>
+              <div class="drop-filename" id="imp-filename"></div>
             </div>
           </div>
 
-          <!-- Paste CSV -->
-          <div id="s-paste-area" class="hidden">
-            <div class="csv-hint">
-              <div class="csv-hint-title">CSV format (header optional)</div>
-              roll_no,name,email,password,branch,year,section<br>
-              22CS045,Riya,riya@college.edu,pass123,CSE,3,B
-            </div>
-            <div class="field"><label>Paste CSV</label>
-              <textarea id="csv-input" rows="5" placeholder="Paste CSV data here..."></textarea>
-            </div>
-          </div>
-
-          <div id="b-preview" class="hidden"></div>
-          <div class="btn-row">
-            <button class="btn-secondary" onclick="previewStudents()">Preview</button>
-            <button class="btn-primary" id="b-import-btn" style="width:auto;padding:10px 18px" onclick="bulkImportStudents()" disabled>Import</button>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Students table -->
-      <div class="card">
-        <div class="table-header">
-          <h2 style="margin:0">All students</h2>
-          <input class="search-input" placeholder="Search name or roll no..." oninput="filterStudents(this.value)">
-        </div>
-        <div id="s-table"><p style="color:#73726c;font-size:14px">Loading...</p></div>
-      </div>
-    </div>
-
-    <!-- ══ TEACHERS TAB ══ -->
-    <div id="tab-teachers" class="hidden">
-      <div class="two-col">
-
-        <div class="card">
-          <h2>Add teacher</h2>
-          <p>Create a new teacher account</p>
-          <div id="t-msg"></div>
-          <div class="field"><label>Full name</label><input type="text" id="t-name" placeholder="Prof. Sharma"></div>
-          <div class="field"><label>Email</label><input type="email" id="t-email" placeholder="sharma@college.edu"></div>
-          <div class="field"><label>Password</label><input type="password" id="t-pass" placeholder="Min. 8 characters"></div>
-          <button class="btn-primary" id="t-btn" onclick="registerTeacher()">Add teacher</button>
-        </div>
-
-        <!-- Bulk import teachers -->
-        <div class="card">
-          <h2>Bulk import teachers</h2>
-          <p>Upload a file or paste CSV</p>
-          <div id="tb-msg"></div>
-
-          <div class="import-toggle">
-            <button class="toggle-btn active" id="t-toggle-file"  onclick="switchImportMode('teachers','file')">📁 Upload file</button>
-            <button class="toggle-btn"        id="t-toggle-paste" onclick="switchImportMode('teachers','paste')">📋 Paste CSV</button>
-          </div>
-
-          <div id="t-file-area">
-            <div class="drop-zone" id="t-drop-zone" onclick="document.getElementById('t-file-input').click()"
-              ondragover="handleDragOver(event,'t-drop-zone')" ondragleave="handleDragLeave('t-drop-zone')"
-              ondrop="handleDrop(event,'teachers')">
-              <input type="file" id="t-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event,'teachers')">
-              <div class="drop-icon">📂</div>
-              <div class="drop-label">Click to upload or drag & drop</div>
-              <div class="drop-hint">Supports CSV, XLSX, XLS</div>
-              <div class="drop-filename" id="t-filename"></div>
-            </div>
-          </div>
-
-          <div id="t-paste-area" class="hidden">
-            <div class="csv-hint">
+          <!-- Paste -->
+          <div id="imp-paste-area" class="hidden">
+            <div class="csv-hint" id="imp-csv-hint">
               <div class="csv-hint-title">CSV format</div>
-              name,email,password<br>
-              Prof. Sharma,sharma@college.edu,pass1234
+              <span id="imp-format-hint"></span>
             </div>
             <div class="field"><label>Paste CSV</label>
-              <textarea id="t-csv-input" rows="5" placeholder="Paste CSV data here..."></textarea>
+              <textarea id="imp-csv-input" rows="7" placeholder="Paste CSV data here..."></textarea>
             </div>
           </div>
 
-          <div id="tb-preview" class="hidden"></div>
+          <div id="imp-preview" class="hidden"></div>
+
           <div class="btn-row">
-            <button class="btn-secondary" onclick="previewTeachers()">Preview</button>
-            <button class="btn-primary" id="tb-import-btn" style="width:auto;padding:10px 18px" onclick="bulkImportTeachers()" disabled>Import</button>
+            <button class="btn-secondary" onclick="previewImport()">Preview</button>
+            <button class="btn-primary" id="imp-import-btn" style="width:auto;padding:10px 20px" onclick="runImport()" disabled>Import</button>
           </div>
         </div>
-
-        <div class="card" style="grid-column:1/-1">
-          <h2>All teachers</h2>
-          <div id="t-list"><p style="color:#73726c;font-size:14px">Loading...</p></div>
-        </div>
-
       </div>
-    </div>
 
-    <!-- ══ COURSES TAB ══ -->
-    <div id="tab-courses" class="hidden">
-      <div class="two-col">
+    </main>
+  </div>
 
-        <div class="card">
-          <h2>Add course</h2>
-          <p>Create and assign a course to a teacher</p>
-          <div id="c-msg"></div>
-          <div class="field"><label>Course name</label><input type="text" id="c-name" placeholder="Data Structures"></div>
-          <div class="field"><label>Course code</label><input type="text" id="c-code" placeholder="CS301" oninput="this.value=this.value.toUpperCase()"></div>
-          <div class="field"><label>Assign teacher</label><select id="c-teacher"></select></div>
-          <button class="btn-primary" id="c-btn" onclick="addCourse()">Add course</button>
-        </div>
-
-        <!-- Bulk import courses -->
-        <div class="card">
-          <h2>Bulk import courses</h2>
-          <p>Upload a file or paste CSV</p>
-          <div id="cb-msg"></div>
-
-          <div class="import-toggle">
-            <button class="toggle-btn active" id="c-toggle-file"  onclick="switchImportMode('courses','file')">📁 Upload file</button>
-            <button class="toggle-btn"        id="c-toggle-paste" onclick="switchImportMode('courses','paste')">📋 Paste CSV</button>
-          </div>
-
-          <div id="c-file-area">
-            <div class="drop-zone" id="c-drop-zone" onclick="document.getElementById('c-file-input').click()"
-              ondragover="handleDragOver(event,'c-drop-zone')" ondragleave="handleDragLeave('c-drop-zone')"
-              ondrop="handleDrop(event,'courses')">
-              <input type="file" id="c-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event,'courses')">
-              <div class="drop-icon">📂</div>
-              <div class="drop-label">Click to upload or drag & drop</div>
-              <div class="drop-hint">Supports CSV, XLSX, XLS</div>
-              <div class="drop-filename" id="c-filename"></div>
-            </div>
-          </div>
-
-          <div id="c-paste-area" class="hidden">
-            <div class="csv-hint">
-              <div class="csv-hint-title">CSV format</div>
-              name,code,teacher_email<br>
-              Data Structures,CS301,sharma@college.edu
-            </div>
-            <div class="field"><label>Paste CSV</label>
-              <textarea id="c-csv-input" rows="5" placeholder="Paste CSV data here..."></textarea>
-            </div>
-          </div>
-
-          <div id="cb-preview" class="hidden"></div>
-          <div class="btn-row">
-            <button class="btn-secondary" onclick="previewCourses()">Preview</button>
-            <button class="btn-primary" id="cb-import-btn" style="width:auto;padding:10px 18px" onclick="bulkImportCourses()" disabled>Import</button>
-          </div>
-        </div>
-
-        <div class="card" style="grid-column:1/-1">
-          <h2>All courses</h2>
-          <div id="c-list"><p style="color:#73726c;font-size:14px">Loading...</p></div>
-        </div>
-
-      </div>
-    </div>
-
-  </main>
-
-  <!-- SheetJS for Excel parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="../js/admin.js"></script>
 </body>
