@@ -121,4 +121,27 @@ router.get('/history', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/detailed-history', authMiddleware, async (req, res) => {
+  try {
+    const records = await sql`
+      SELECT
+        a.id,
+        a.scanned_at,
+        a.status,
+        c.name  AS course_name,
+        c.code  AS course_code
+      FROM attendance a
+      JOIN sessions se ON se.id = a.session_id
+      JOIN courses  c  ON c.id  = se.course_id
+      WHERE a.student_id = ${req.user.id}
+      ORDER BY a.scanned_at DESC
+      LIMIT 100
+    `;
+    res.json(records);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Could not fetch history' });
+  }
+});
+
 module.exports = router;
