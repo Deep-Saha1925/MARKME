@@ -3,7 +3,7 @@ require('dotenv').config();
 
 module.exports = (req, res, next) => {
   const header = req.headers['authorization'];
-  const token = header && header.split(' ')[1]; // "Bearer <token>"
+  const token = header && header.split(' ')[1];
 
   if (!token) return res.status(401).json({ error: 'No token provided' });
 

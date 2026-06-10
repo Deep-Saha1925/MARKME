@@ -57,7 +57,7 @@ router.post('/generate', authMiddleware, async (req, res) => {
     res.json({
       session_id: session.id,
       token,
-      qr_image:   qrImage,       // base64 PNG — drop straight into <img src="">
+      qr_image:   qrImage,
       expires_at: expiresAt,
       expiry_mins: expiryMins,
     });

@@ -1,6 +1,3 @@
-// backend/routes/admin.js
-// Mount in server.js as: app.use('/api/admin', require('./routes/admin'));
-
 const express = require('express');
 const sql = require('../db');
 const authMiddleware = require('../middleware/auth');

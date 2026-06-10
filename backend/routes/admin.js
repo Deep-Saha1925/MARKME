@@ -1,5 +1,3 @@
-// backend/routes/admin.js
-
 const express = require('express');
 const sql = require('../db');
 const authMiddleware = require('../middlewares/auth');
@@ -14,9 +12,7 @@ router.use(authMiddleware, (req, res, next) => {
   next();
 });
 
-// ─────────────────────────────────────────────
-// GET /api/admin/students
-// ─────────────────────────────────────────────
+// All students
 router.get('/students', async (req, res) => {
   try {
     const rows = await sql`
@@ -31,9 +27,7 @@ router.get('/students', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
-// GET /api/admin/teachers
-// ─────────────────────────────────────────────
+// All teachers
 router.get('/teachers', async (req, res) => {
   try {
     const rows = await sql`
@@ -48,9 +42,7 @@ router.get('/teachers', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
-// GET /api/admin/courses
-// ─────────────────────────────────────────────
+// All courses
 router.get('/courses', async (req, res) => {
   try {
     const rows = await sql`
@@ -67,9 +59,7 @@ router.get('/courses', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
-// POST /api/admin/courses
-// ─────────────────────────────────────────────
+// Add course
 router.post('/courses', async (req, res) => {
   const { name, code, teacher_id } = req.body;
 
