@@ -151,13 +151,47 @@ function filterHistory(type, btn) {
 // ─────────────────────────────────────────────
 // QR SCANNER
 // ─────────────────────────────────────────────
-function getLocation() {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(
-    pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; },
-    () => {}
-  );
+// function getLocation() {
+//   if (!navigator.geolocation) return;
+//   navigator.geolocation.getCurrentPosition(
+//     pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; },
+//     () => {}
+//   );
+// }
+
+function getCurrentLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      resolve({ lat: null, lng: null, skipped: true });
+      return;
+    }
+
+    setStatus('Getting your location...', 'info');
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        resolve({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+          skipped: false
+        });
+      },
+      err => {
+        // If denied or unavailable — don't block the scan
+        // Server will allow scan without geo if session has no fence
+        console.warn('Location error:', err.message);
+        resolve({ lat: null, lng: null, skipped: true });
+      },
+      {
+        enableHighAccuracy: true,   // use GPS not just WiFi
+        timeout: 8000,              // wait up to 8 seconds
+        maximumAge: 0               // never use cached location
+      }
+    );
+  });
 }
+
 
 function startScanner() {
   document.getElementById('start-btn').classList.add('hidden');
