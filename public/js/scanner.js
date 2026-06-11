@@ -226,12 +226,29 @@ async function onScanSuccess(decodedText) {
   if (scanning) return;
   scanning = true;
   stopScanner();
+
+  // ── Step 1: Get fresh GPS location ──
+  const location = await getCurrentLocation();
+
+  if (location.skipped) {
+    setStatus('Location unavailable — proceeding without geo-fence check', 'info');
+  } else if (location.accuracy > 100) {
+    // Warn if GPS accuracy is poor (>100m) but still proceed
+    setStatus('Low GPS accuracy (' + Math.round(location.accuracy) + 'm) — proceeding...', 'info');
+  }
+
   setStatus('Verifying attendance...', 'info');
 
+  // ── Step 2: Send scan with fresh coordinates ──
   try {
     const res  = await apiFetch('/api/attendance/scan', {
       method: 'POST',
-      body: JSON.stringify({ token: decodedText, device_id: deviceId, lat: userLat, lng: userLng })
+      body: JSON.stringify({
+        token:     decodedText,
+        device_id: deviceId,
+        lat:       location.lat,
+        lng:       location.lng,
+      })
     });
     const data = await res.json();
 
@@ -248,7 +265,6 @@ async function onScanSuccess(decodedText) {
     document.getElementById('success-course').textContent = data.course_name;
     document.getElementById('success-time').textContent   = 'Marked at ' + formatTime(data.scanned_at);
 
-    // Refresh data in background
     loadCourses();
     loadHistory();
 
