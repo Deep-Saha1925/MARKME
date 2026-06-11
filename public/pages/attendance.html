@@ -9,7 +9,6 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f4f4f0; color: #1a1a18; min-height: 100vh; }
 
-    /* ── Navbar ── */
     .navbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: #fff; border-bottom: 1px solid #e0dfd8; position: sticky; top: 0; z-index: 10; }
     .nav-logo { display: flex; align-items: center; gap: 8px; }
     .logo-mark { width: 30px; height: 30px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
@@ -18,76 +17,84 @@
     .nav-user  { font-size: 13px; color: #73726c; }
     .btn-signout { padding: 6px 12px; font-size: 12px; cursor: pointer; background: none; border: 1px solid #d3d1c7; border-radius: 8px; color: #3d3d3a; }
 
-    /* ── Bottom tab bar ── */
     .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e0dfd8; display: flex; z-index: 10; }
     .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0 8px; cursor: pointer; border: none; background: none; color: #73726c; font-size: 11px; font-weight: 500; gap: 3px; transition: color 0.15s; }
     .tab-item .tab-icon { font-size: 20px; }
     .tab-item.active { color: #534AB7; }
 
-    /* ── Layout ── */
     .page { display: none; padding: 20px 16px 80px; max-width: 560px; margin: 0 auto; }
     .page.active { display: block; }
-
-    /* ── Cards ── */
     .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+    .hidden { display: none !important; }
 
-    /* ── Home page ── */
+    /* ── Home ── */
     .welcome-banner { background: linear-gradient(135deg, #534AB7, #7B74D4); border-radius: 14px; padding: 20px; color: #fff; margin-bottom: 16px; }
-    .welcome-name   { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-    .welcome-sub    { font-size: 13px; opacity: 0.8; }
-    .welcome-meta   { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
-    .welcome-chip   { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-size: 12px; }
-
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    .stat-card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 16px; text-align: center; }
+    .welcome-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .welcome-sub  { font-size: 13px; opacity: 0.8; }
+    .welcome-meta { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+    .welcome-chip { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-size: 12px; }
+    .stats-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .stat-card  { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 16px; text-align: center; }
     .stat-num   { font-size: 26px; font-weight: 600; color: #534AB7; }
     .stat-label { font-size: 12px; color: #73726c; margin-top: 2px; }
-
     .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
 
     /* ── Course cards ── */
-    .course-card { border: 1px solid #e0dfd8; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: #fff; }
-    .course-top  { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .course-name { font-size: 14px; font-weight: 600; }
-    .course-code { font-size: 11px; color: #73726c; margin-top: 2px; }
-    .pct-badge   { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
-    .pct-safe    { background: #E1F5EE; color: #0F6E56; }
-    .pct-warn    { background: #FAEEDA; color: #854F0B; }
-    .pct-danger  { background: #FCEBEB; color: #791F1F; }
-    .bar-bg      { height: 5px; background: #e0dfd8; border-radius: 4px; }
-    .bar-fill    { height: 5px; border-radius: 4px; transition: width 0.5s ease; }
+    .course-card   { border: 1px solid #e0dfd8; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: #fff; }
+    .course-top    { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .course-name   { font-size: 14px; font-weight: 600; }
+    .course-code   { font-size: 11px; color: #73726c; margin-top: 2px; }
+    .pct-badge     { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+    .pct-safe      { background: #E1F5EE; color: #0F6E56; }
+    .pct-warn      { background: #FAEEDA; color: #854F0B; }
+    .pct-danger    { background: #FCEBEB; color: #791F1F; }
+    .bar-bg        { height: 5px; background: #e0dfd8; border-radius: 4px; }
+    .bar-fill      { height: 5px; border-radius: 4px; transition: width 0.5s ease; }
     .course-detail { font-size: 12px; color: #73726c; margin-top: 6px; }
 
-    /* ── Scanner page ── */
-    .scanner-hero { text-align: center; margin-bottom: 20px; }
+    /* ── Scanner ── */
+    .scanner-hero    { text-align: center; margin-bottom: 16px; }
     .scanner-hero h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
     .scanner-hero p  { font-size: 13px; color: #73726c; }
+    .qr-wrapper  { border-radius: 16px; overflow: hidden; background: #1a1a18; margin-bottom: 14px; min-height: 260px; }
+    #qr-reader   { width: 100%; }
 
-    .qr-wrapper { border-radius: 16px; overflow: hidden; background: #1a1a18; margin-bottom: 14px; min-height: 260px; }
-    #qr-reader  { width: 100%; }
+    /* ── Location banner ── */
+    .loc-banner { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; text-align: center; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .loc-banner.info    { background: #E0EDFB; color: #185FA5; }
+    .loc-banner.success { background: #E1F5EE; color: #0F6E56; }
+    .loc-banner.warning { background: #FAEEDA; color: #854F0B; }
+    .loc-banner.error   { background: #FCEBEB; color: #791F1F; border: 1px solid #f09595; }
 
-    .scan-status { min-height: 20px; font-size: 13px; text-align: center; margin-bottom: 12px; border-radius: 8px; padding: 0; }
+    /* ── HTTPS warning ── */
+    .https-warning { background: #FFF4E0; border: 1px solid #F6B500; border-radius: 12px; padding: 18px; margin-bottom: 16px; text-align: center; }
+    .https-warning .warn-icon { font-size: 28px; margin-bottom: 8px; }
+    .https-warning h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #7A4F00; }
+    .https-warning p  { font-size: 13px; color: #7A4F00; line-height: 1.5; }
+    .https-warning code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+    .scan-status { min-height: 20px; font-size: 13px; text-align: center; margin-bottom: 12px; border-radius: 8px; }
     .scan-status.info    { color: #185FA5; }
     .scan-status.error   { background: #FCEBEB; color: #791F1F; padding: 10px 14px; border: 1px solid #f09595; }
     .scan-status.success { background: #E1F5EE; color: #085041; padding: 10px 14px; }
 
     .btn-primary { width: 100%; padding: 12px; font-size: 15px; font-weight: 500; background: #534AB7; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
-    .btn-primary:hover { background: #3C3489; }
+    .btn-primary:hover    { background: #3C3489; }
+    .btn-primary:disabled { background: #9c9a92; cursor: not-allowed; }
     .btn-outline { width: 100%; padding: 11px; font-size: 14px; font-weight: 500; background: none; border: 1px solid #d3d1c7; color: #3d3d3a; border-radius: 10px; cursor: pointer; margin-top: 8px; }
     .btn-outline:hover { background: #f4f4f0; }
 
-    /* ── Success screen ── */
+    /* ── Success ── */
     .success-screen { text-align: center; padding: 10px 0; }
     .success-circle { width: 64px; height: 64px; background: #E1F5EE; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
     .success-title  { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
     .success-course { font-size: 15px; color: #534AB7; font-weight: 500; margin-bottom: 4px; }
     .success-time   { font-size: 13px; color: #73726c; margin-bottom: 20px; }
 
-    /* ── Attendance history page ── */
-    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-    .filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1px solid #d3d1c7; background: #fff; cursor: pointer; color: #3d3d3a; transition: all 0.12s; }
+    /* ── History ── */
+    .filter-bar   { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-chip  { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1px solid #d3d1c7; background: #fff; cursor: pointer; color: #3d3d3a; transition: all 0.12s; }
     .filter-chip.active { background: #534AB7; color: #fff; border-color: #534AB7; }
-
     .attendance-item { padding: 14px 0; border-bottom: 1px solid #f0efe8; }
     .attendance-item:last-child { border-bottom: none; }
     .att-top    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
@@ -97,10 +104,7 @@
     .att-present { background: #E1F5EE; color: #0F6E56; }
     .att-absent  { background: #FCEBEB; color: #791F1F; }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: #73726c; font-size: 14px; }
-    .empty-icon  { font-size: 36px; margin-bottom: 10px; }
-
-    /* ── Profile page ── */
+    /* ── Profile ── */
     .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: #EEEDF8; color: #534AB7; font-size: 24px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
     .profile-name   { text-align: center; font-size: 18px; font-weight: 600; margin-bottom: 4px; }
     .profile-roll   { text-align: center; font-size: 13px; color: #73726c; margin-bottom: 20px; }
@@ -109,7 +113,8 @@
     .info-label { color: #73726c; }
     .info-value { font-weight: 500; }
 
-    .hidden { display: none !important; }
+    .empty-state { text-align: center; padding: 40px 20px; color: #73726c; font-size: 14px; }
+    .empty-icon  { font-size: 36px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -125,9 +130,8 @@
     </div>
   </nav>
 
-  <!-- ── HOME PAGE ── -->
+  <!-- ── HOME ── -->
   <div class="page active" id="page-home">
-
     <div class="welcome-banner">
       <div class="welcome-name">Hi, <span id="home-name">Student</span> 👋</div>
       <div class="welcome-sub">Here's your attendance overview</div>
@@ -137,27 +141,27 @@
         <span class="welcome-chip" id="home-section">—</span>
       </div>
     </div>
-
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num" id="home-total-classes">—</div>
-        <div class="stat-label">Classes attended</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="home-avg-pct">—</div>
-        <div class="stat-label">Avg attendance</div>
-      </div>
+      <div class="stat-card"><div class="stat-num" id="home-total-classes">—</div><div class="stat-label">Classes attended</div></div>
+      <div class="stat-card"><div class="stat-num" id="home-avg-pct">—</div><div class="stat-label">Avg attendance</div></div>
     </div>
-
     <div class="section-title">My courses</div>
-    <div id="home-courses">
-      <div class="empty-state"><div class="empty-icon">📚</div>Loading courses...</div>
-    </div>
-
+    <div id="home-courses"><div class="empty-state"><div class="empty-icon">📚</div>Loading courses...</div></div>
   </div>
 
-  <!-- ── SCAN PAGE ── -->
+  <!-- ── SCAN ── -->
   <div class="page" id="page-scan">
+
+    <!-- HTTPS warning — shown only on HTTP non-localhost -->
+    <div class="https-warning hidden" id="https-warning">
+      <div class="warn-icon">⚠️</div>
+      <h3>Location blocked — HTTPS required</h3>
+      <p>
+        Browsers block GPS on plain HTTP. To fix this for testing,
+        run <code>ngrok http 3000</code> and open the
+        <code>https://</code> URL on your phone instead.
+      </p>
+    </div>
 
     <!-- Scanner view -->
     <div id="scan-view">
@@ -165,10 +169,19 @@
         <h2>Scan QR code</h2>
         <p>Point your camera at the QR on the projector</p>
       </div>
-      <div class="qr-wrapper">
-        <div id="qr-reader"></div>
-      </div>
+
+      <!-- Location status banner -->
+      <div id="loc-banner" class="loc-banner info hidden"></div>
+
+      <!-- Retry location button -->
+      <button class="btn-outline hidden" id="retry-loc-btn"
+        onclick="retryLocation()" style="margin-bottom:12px">
+        📍 Retry location
+      </button>
+
+      <div class="qr-wrapper"><div id="qr-reader"></div></div>
       <div id="scan-status" class="scan-status"></div>
+
       <button class="btn-primary" id="start-btn" onclick="startScanner()">Start camera</button>
       <button class="btn-outline hidden" id="stop-btn" onclick="stopScanner()">Stop camera</button>
     </div>
@@ -189,24 +202,20 @@
 
   </div>
 
-  <!-- ── HISTORY PAGE ── -->
+  <!-- ── HISTORY ── -->
   <div class="page" id="page-history">
     <div class="section-title" style="margin-bottom:14px">Attendance history</div>
-
     <div class="filter-bar">
       <button class="filter-chip active" onclick="filterHistory('all', this)">All</button>
       <button class="filter-chip" onclick="filterHistory('present', this)">Present</button>
       <button class="filter-chip" onclick="filterHistory('absent', this)">Absent</button>
     </div>
-
     <div class="card" style="padding:0 16px">
-      <div id="history-list">
-        <div class="empty-state"><div class="empty-icon">📋</div>Loading history...</div>
-      </div>
+      <div id="history-list"><div class="empty-state"><div class="empty-icon">📋</div>Loading history...</div></div>
     </div>
   </div>
 
-  <!-- ── PROFILE PAGE ── -->
+  <!-- ── PROFILE ── -->
   <div class="page" id="page-profile">
     <div class="card" style="margin-bottom:16px">
       <div class="profile-avatar" id="profile-avatar">—</div>
@@ -214,40 +223,20 @@
       <div class="profile-roll"   id="profile-roll">—</div>
       <div id="profile-info"></div>
     </div>
-
     <div class="card">
       <div class="section-title" style="margin-bottom:14px">Course summary</div>
-      <div id="profile-courses">
-        <div class="empty-state"><div class="empty-icon">📚</div>Loading...</div>
-      </div>
+      <div id="profile-courses"><div class="empty-state"><div class="empty-icon">📚</div>Loading...</div></div>
     </div>
-
     <button class="btn-outline" onclick="logout()" style="margin-top:4px">Sign out</button>
   </div>
 
-  <!-- ── BOTTOM TAB BAR ── -->
+  <!-- ── TAB BAR ── -->
   <nav class="tab-bar">
-    <button class="tab-item active" onclick="switchTab('home')" id="tab-home">
-      <span class="tab-icon">🏠</span>Home
-    </button>
-    <button class="tab-item" onclick="switchTab('scan')" id="tab-scan">
-      <span class="tab-icon">📷</span>Scan
-    </button>
-    <button class="tab-item" onclick="switchTab('history')" id="tab-history">
-      <span class="tab-icon">📋</span>History
-    </button>
-    <button class="tab-item" onclick="switchTab('profile')" id="tab-profile">
-      <span class="tab-icon">👤</span>Profile
-    </button>
+    <button class="tab-item active" onclick="switchTab('home')"    id="tab-home"><span class="tab-icon">🏠</span>Home</button>
+    <button class="tab-item"        onclick="switchTab('scan')"    id="tab-scan"><span class="tab-icon">📷</span>Scan</button>
+    <button class="tab-item"        onclick="switchTab('history')" id="tab-history"><span class="tab-icon">📋</span>History</button>
+    <button class="tab-item"        onclick="switchTab('profile')" id="tab-profile"><span class="tab-icon">👤</span>Profile</button>
   </nav>
-
-  <script>
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(() => {}, () => {}, {
-      enableHighAccuracy: true, timeout: 10000, maximumAge: 0
-    });
-  }
-</script>
 
   <script src="../js/scanner.js"></script>
 </body>

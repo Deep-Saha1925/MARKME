@@ -1,5 +1,3 @@
-// public/js/admin.js
-
 const token = localStorage.getItem('markme_token');
 const user  = JSON.parse(localStorage.getItem('markme_user') || '{}');
 if (!token || user.role !== 'admin') window.location.href = '/pages/login.html';
