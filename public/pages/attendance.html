@@ -241,6 +241,14 @@
     </button>
   </nav>
 
+  <script>
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(() => {}, () => {}, {
+      enableHighAccuracy: true, timeout: 10000, maximumAge: 0
+    });
+  }
+</script>
+
   <script src="../js/scanner.js"></script>
 </body>
 </html>
