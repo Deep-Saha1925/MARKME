@@ -1,67 +1,99 @@
+// public/js/dashboard.js
+
 const token = localStorage.getItem('markme_token');
 const user  = JSON.parse(localStorage.getItem('markme_user') || '{}');
-
-// Redirect to login if not authenticated
 if (!token) window.location.href = '/pages/login.html';
 
-// Show teacher name in navbar
 document.getElementById('teacher-name').textContent = user.name || '';
 
-let currentSessionId  = null;
+let currentSessionId   = null;
 let attendanceInterval = null;
 let timerInterval      = null;
-let expiresAt          = null;
 let userLat            = null;
 let userLng            = null;
+let sessionClosed      = false;
 
-// ── On load ─────────────────────────────────
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   loadCourses();
   getLocation();
 });
 
-// ── Load teacher's courses into dropdown ────
+// ─────────────────────────────────────────────
+// LOAD COURSES
+// ─────────────────────────────────────────────
 async function loadCourses() {
   const res  = await apiFetch('/api/sessions/my-courses');
   const data = await res.json();
   const sel  = document.getElementById('course-select');
 
-  if (!data.length) {
-    sel.innerHTML = '<option value="">No courses assigned yet</option>';
+  if (!res.ok || !data.length) {
+    sel.innerHTML = '<option value="">No courses assigned yet — ask admin</option>';
     return;
   }
-
   sel.innerHTML = data.map(c =>
     `<option value="${c.id}">${c.name} (${c.code})</option>`
   ).join('');
 }
 
-// ── Get teacher's location for geo-fence ────
+// ─────────────────────────────────────────────
+// LOCATION
+// Gets teacher's GPS to set as geo-fence centre.
+// Shows a clear banner with status.
+// ─────────────────────────────────────────────
 function getLocation() {
-  const status = document.getElementById('geo-status');
+  const banner = document.getElementById('geo-banner');
+
   if (!navigator.geolocation) {
-    status.textContent = 'Location not supported — geo-fence will be skipped';
+    setBanner('geo-warn', '⚠️ Location not supported — geo-fence will be skipped');
     return;
   }
+
+  // Check HTTPS — geolocation is blocked on HTTP outside localhost
+  const isHTTP      = location.protocol === 'http:';
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (isHTTP && !isLocalhost) {
+    setBanner('geo-warn', '⚠️ GPS blocked on HTTP — use ngrok HTTPS for geo-fence. Continuing without location.');
+    return;
+  }
+
+  setBanner('geo-loading', '📍 Getting your location...');
+
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
+    pos => {
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
-      status.innerHTML = '📍 Location captured — geo-fence active';
-      status.classList.add('geo-ok');
+      const acc = Math.round(pos.coords.accuracy);
+      setBanner('geo-ok', `✓ Location captured (±${acc}m) — geo-fence will be active`);
     },
-    () => {
-      status.textContent = '⚠️ Location denied — geo-fence will be skipped';
-      status.classList.add('geo-warn');
-    }
+    err => {
+      const msgs = {
+        1: '⚠️ Location denied — geo-fence will be skipped. Allow location in browser settings.',
+        2: '⚠️ Location unavailable — geo-fence will be skipped.',
+        3: '⚠️ Location timed out — geo-fence will be skipped.',
+      };
+      setBanner('geo-warn', msgs[err.code] || '⚠️ Location error — geo-fence will be skipped');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
 }
 
-// ── Generate QR ──────────────────────────────
+function setBanner(type, msg) {
+  const banner = document.getElementById('geo-banner');
+  banner.className = 'geo-banner ' + type;
+  banner.textContent = msg;
+}
+
+// ─────────────────────────────────────────────
+// GENERATE QR
+// ─────────────────────────────────────────────
 async function generateQR() {
-  const courseId = document.getElementById('course-select').value;
-  const expiry   = document.getElementById('expiry').value;
-  const btn      = document.getElementById('generate-btn');
+  const courseId    = document.getElementById('course-select').value;
+  const expiry      = document.getElementById('expiry').value;
+  const fenceRadius = document.getElementById('fence-radius').value;
+  const btn         = document.getElementById('generate-btn');
 
   if (!courseId) {
     alert('Please select a course');
@@ -77,61 +109,74 @@ async function generateQR() {
       course_id:      parseInt(courseId),
       lat:            userLat,
       lng:            userLng,
-      fence_radius_m: 100,
+      fence_radius_m: parseInt(fenceRadius),
       expiry_minutes: parseInt(expiry),
     })
   });
 
   const data = await res.json();
+  btn.textContent = 'Generate QR code';
+  btn.disabled    = false;
 
   if (!res.ok) {
     alert(data.error || 'Failed to generate QR');
-    btn.textContent = 'Generate QR code';
-    btn.disabled    = false;
     return;
   }
 
-  // Show QR section
+  // Populate session info
   currentSessionId = data.session_id;
-  expiresAt        = new Date(data.expires_at);
+  sessionClosed    = false;
 
-  const courseName = document.getElementById('course-select')
-    .options[document.getElementById('course-select').selectedIndex].text;
+  const sel        = document.getElementById('course-select');
+  const courseName = sel.options[sel.selectedIndex].text;
 
   document.getElementById('qr-course-name').textContent = courseName;
-  document.getElementById('qr-image').src = data.qr_image;
-  document.getElementById('qr-section').classList.remove('hidden');
-  document.querySelector('.card').classList.add('hidden'); // hide generate form
+  document.getElementById('qr-date').textContent        = new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+  document.getElementById('qr-geo-info').textContent    = userLat
+    ? `Active · ${fenceRadius}m radius`
+    : 'Not active (no location)';
+  document.getElementById('qr-image').src               = data.qr_image;
+
+  // Show QR card, hide generate card
+  document.getElementById('generate-card').classList.add('hidden');
+  document.getElementById('qr-card').classList.remove('hidden');
+  document.getElementById('closed-banner').classList.add('hidden');
 
   startTimer(data.expiry_mins * 60);
   startPolling();
-
-  btn.textContent = 'Generate QR code';
-  btn.disabled    = false;
 }
 
-// ── Countdown timer ──────────────────────────
+// ─────────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────────
 function startTimer(seconds) {
-  const timerEl = document.getElementById('timer');
-  let remaining = seconds;
+  const timerText = document.getElementById('timer-text');
+  const timerBox  = document.getElementById('timer-box');
+  let remaining   = seconds;
+
+  clearInterval(timerInterval);
 
   timerInterval = setInterval(() => {
-    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
-    const s = String(remaining % 60).padStart(2, '0');
-    timerEl.textContent = `Expires in ${m}:${s}`;
-    timerEl.className   = remaining <= 60 ? 'timer timer-urgent' : 'timer';
-
     if (remaining <= 0) {
       clearInterval(timerInterval);
-      timerEl.textContent = 'QR expired';
-      timerEl.className   = 'timer timer-expired';
+      timerText.textContent  = 'QR expired';
+      timerBox.className     = 'timer-box timer-expired';
+      return;
     }
+
+    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const s = String(remaining % 60).padStart(2, '0');
+    timerText.textContent = `Expires in ${m}:${s}`;
+    timerBox.className    = remaining <= 60 ? 'timer-box timer-urgent' : 'timer-box timer-active';
     remaining--;
   }, 1000);
 }
 
-// ── Poll attendance every 3 seconds ─────────
+// ─────────────────────────────────────────────
+// LIVE ATTENDANCE POLLING
+// ─────────────────────────────────────────────
 function startPolling() {
+  clearInterval(attendanceInterval);
   fetchAttendance();
   attendanceInterval = setInterval(fetchAttendance, 3000);
 }
@@ -139,15 +184,14 @@ function startPolling() {
 async function fetchAttendance() {
   if (!currentSessionId) return;
   const res  = await apiFetch(`/api/sessions/${currentSessionId}/attendance`);
+  if (!res.ok) return;
   const data = await res.json();
 
-  const list  = document.getElementById('attendance-list');
-  const count = document.getElementById('present-count');
+  document.getElementById('present-count').textContent = `${data.length} present`;
 
-  count.textContent = `${data.length} present`;
-
+  const list = document.getElementById('attendance-list');
   if (!data.length) {
-    list.innerHTML = '<p class="text-muted">Waiting for scans...</p>';
+    list.innerHTML = '<p style="color:#73726c;font-size:14px">Waiting for scans...</p>';
     return;
   }
 
@@ -158,11 +202,12 @@ async function fetchAttendance() {
         <span class="student-name">${r.student_name}</span>
       </div>
       <span class="scan-time">${formatTime(r.scanned_at)}</span>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-// ── Close session ────────────────────────────
+// ─────────────────────────────────────────────
+// CLOSE SESSION
+// ─────────────────────────────────────────────
 async function closeSession() {
   if (!confirm('Close this session? Students will no longer be able to scan.')) return;
 
@@ -170,30 +215,75 @@ async function closeSession() {
 
   clearInterval(attendanceInterval);
   clearInterval(timerInterval);
+  sessionClosed = true;
 
-  document.getElementById('timer').textContent = 'Session closed';
-  document.getElementById('timer').className   = 'timer timer-expired';
+  const timerText = document.getElementById('timer-text');
+  const timerBox  = document.getElementById('timer-box');
+  timerText.textContent = 'Session closed';
+  timerBox.className    = 'timer-box timer-expired';
+
+  document.getElementById('closed-banner').classList.remove('hidden');
+
+  // Hide close button
+  document.querySelector('.btn-danger').classList.add('hidden');
 }
 
-// ── Logout ────────────────────────────────────
-function logout() {
-  localStorage.removeItem('markme_token');
-  localStorage.removeItem('markme_user');
-  window.location.href = '/pages/login.html';
+// ─────────────────────────────────────────────
+// BACK TO HOME
+// Resets the view to the generate form.
+// Warns if a session is still active.
+// ─────────────────────────────────────────────
+function backToHome() {
+  if (currentSessionId && !sessionClosed) {
+    const confirm_ = confirm(
+      'An active session is still running.\n\nStudents can still scan until it expires.\n\nGo back to home anyway?'
+    );
+    if (!confirm_) return;
+  }
+
+  // Stop polling + timer
+  clearInterval(attendanceInterval);
+  clearInterval(timerInterval);
+  currentSessionId = null;
+  sessionClosed    = false;
+
+  // Reset QR card
+  document.getElementById('qr-image').src = '';
+  document.getElementById('timer-text').textContent = '--:--';
+  document.getElementById('timer-box').className    = 'timer-box timer-active';
+  document.getElementById('attendance-list').innerHTML = '<p style="color:#73726c;font-size:14px">Waiting for scans...</p>';
+  document.getElementById('present-count').textContent = '0 present';
+  document.getElementById('closed-banner').classList.add('hidden');
+  document.querySelector('.btn-danger') && document.querySelector('.btn-danger').classList.remove('hidden');
+
+  // Show generate card
+  document.getElementById('qr-card').classList.add('hidden');
+  document.getElementById('generate-card').classList.remove('hidden');
+
+  // Re-fetch location in case it changed
+  getLocation();
 }
 
-// ── Helpers ──────────────────────────────────
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
 function apiFetch(url, options = {}) {
   return fetch(url, {
     ...options,
     headers: {
       'Content-Type':  'application/json',
       'Authorization': `Bearer ${token}`,
-      ...options.headers,
-    },
+      ...(options.headers || {}),
+    }
   });
 }
 
 function formatTime(iso) {
-  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function logout() {
+  localStorage.removeItem('markme_token');
+  localStorage.removeItem('markme_user');
+  window.location.href = '/pages/login.html';
 }
