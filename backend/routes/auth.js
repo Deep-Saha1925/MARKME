@@ -348,5 +348,41 @@ router.post('/student/activate', async (req, res) => {
   }
 });
 
+// POST /api/auth/student/change-password
+// Student changes their own password (verifies current password first)
+router.post('/student/change-password', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'student') {
+    return res.status(403).json({ error: 'Students only' });
+  }
+
+  const { current_password, new_password } = req.body;
+
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'Both current and new password are required' });
+  }
+  if (new_password.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters' });
+  }
+
+  try {
+    const rows = await sql`SELECT password FROM students WHERE id = ${req.user.id}`;
+    if (!rows.length) return res.status(404).json({ error: 'Student not found' });
+
+    // Verify current password
+    const match = await bcrypt.compare(current_password, rows[0].password);
+    if (!match) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const hash = await bcrypt.hash(new_password, 10);
+    await sql`UPDATE students SET password = ${hash} WHERE id = ${req.user.id}`;
+
+    res.json({ message: 'Password updated successfully' });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Could not update password' });
+  }
+});
 
 module.exports = router;
