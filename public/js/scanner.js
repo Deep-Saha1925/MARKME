@@ -381,6 +381,72 @@ function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 }
 
+// CHANGE PASSWORD
+async function changePassword() {
+  const current = document.getElementById('pwd-current').value;
+  const newPwd  = document.getElementById('pwd-new').value;
+  const confirm = document.getElementById('pwd-confirm').value;
+  const msgEl   = document.getElementById('pwd-msg');
+  const btn     = document.getElementById('pwd-btn');
+
+  // Clear previous message
+  msgEl.textContent  = '';
+  msgEl.style.display = 'none';
+
+  // Validate
+  if (!current || !newPwd || !confirm) {
+    showPwdMsg('error', 'Please fill in all fields');
+    return;
+  }
+  if (newPwd.length < 8) {
+    showPwdMsg('error', 'New password must be at least 8 characters');
+    return;
+  }
+  if (newPwd !== confirm) {
+    showPwdMsg('error', 'New passwords do not match');
+    return;
+  }
+  if (current === newPwd) {
+    showPwdMsg('error', 'New password must be different from current password');
+    return;
+  }
+
+  btn.textContent = 'Updating...';
+  btn.disabled    = true;
+
+  try {
+    const res  = await apiFetch('/api/auth/student/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ current_password: current, new_password: newPwd })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showPwdMsg('error', data.error || 'Failed to update password');
+      return;
+    }
+
+    showPwdMsg('success', '✓ Password updated successfully');
+    document.getElementById('pwd-current').value = '';
+    document.getElementById('pwd-new').value     = '';
+    document.getElementById('pwd-confirm').value = '';
+
+  } catch {
+    showPwdMsg('error', 'Could not connect to server');
+  } finally {
+    btn.textContent = 'Update password';
+    btn.disabled    = false;
+  }
+}
+
+function showPwdMsg(type, text) {
+  const el = document.getElementById('pwd-msg');
+  el.style.cssText = type === 'error'
+    ? 'display:block;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;background:#FCEBEB;color:#791F1F;border:1px solid #f09595'
+    : 'display:block;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;background:#E1F5EE;color:#085041;border:1px solid #5DCAA5';
+  el.textContent = text;
+}
+
 function logout() {
   localStorage.removeItem('markme_token');
   localStorage.removeItem('markme_user');
