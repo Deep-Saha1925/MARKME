@@ -227,7 +227,41 @@
       <div class="section-title" style="margin-bottom:14px">Course summary</div>
       <div id="profile-courses"><div class="empty-state"><div class="empty-icon">📚</div>Loading...</div></div>
     </div>
+    
+    <!-- Change password card -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="section-title" style="margin-bottom:14px">Change password</div>
+      <div id="pwd-msg"></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">
+            Current password
+          </label>
+          <input type="password" id="pwd-current" placeholder="Your current password"
+            style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">
+            New password
+          </label>
+          <input type="password" id="pwd-new" placeholder="Min. 8 characters"
+            style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">
+            Confirm new password
+          </label>
+          <input type="password" id="pwd-confirm" placeholder="Repeat new password"
+            style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
+        </div>
+        <button class="btn-primary" id="pwd-btn" onclick="changePassword()">
+          Update password
+        </button>
+      </div>
+    </div>
+
     <button class="btn-outline" onclick="logout()" style="margin-top:4px">Sign out</button>
+
   </div>
 
   <!-- ── TAB BAR ── -->
