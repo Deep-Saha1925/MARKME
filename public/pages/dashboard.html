@@ -3,16 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MarkMe — Dashboard</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <title>MarkMe — Teacher Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f4f4f0; color: #1a1a18; min-height: 100vh; }
+
+    /* ── Navbar ── */
+    .navbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: #fff; border-bottom: 1px solid #e0dfd8; position: sticky; top: 0; z-index: 10; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-mark { width: 32px; height: 32px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .logo-text { font-size: 18px; font-weight: 600; }
+    .nav-badge { font-size: 11px; background: #EEEDF8; color: #534AB7; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-user  { font-size: 14px; color: #73726c; }
+    .btn-ghost { padding: 7px 14px; font-size: 13px; cursor: pointer; background: none; border: 1px solid #d3d1c7; border-radius: 8px; color: #3d3d3a; }
+    .btn-ghost:hover { background: #f4f4f0; }
+
+    /* ── Layout ── */
+    .container { max-width: 1000px; margin: 28px auto; padding: 0 20px; }
+    .hidden { display: none !important; }
+
+    /* ── Cards ── */
+    .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 14px; padding: 28px 32px; margin-bottom: 24px; }
+    .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .text-muted { color: #73726c; font-size: 14px; margin-bottom: 16px; }
+
+    /* ── Form ── */
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+    .field label { font-size: 13px; font-weight: 500; color: #3d3d3a; }
+    .field select { padding: 10px 12px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 14px; background: #fafaf8; outline: none; }
+    .field select:focus { border-color: #534AB7; }
+
+    /* ── Geo status ── */
+    .geo-banner { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 16px; }
+    .geo-loading { background: #E0EDFB; color: #185FA5; }
+    .geo-ok      { background: #E1F5EE; color: #0F6E56; }
+    .geo-warn    { background: #FAEEDA; color: #854F0B; }
+    .geo-error   { background: #FCEBEB; color: #791F1F; }
+
+    /* ── Buttons ── */
+    .btn-primary { padding: 11px 24px; font-size: 14px; font-weight: 500; background: #534AB7; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-primary:hover    { background: #3C3489; }
+    .btn-primary:disabled { background: #9c9a92; cursor: not-allowed; }
+    .btn-danger  { padding: 10px 20px; font-size: 14px; font-weight: 500; background: #A32D2D; color: #fff; border: none; border-radius: 8px; cursor: pointer; margin-top: 14px; }
+    .btn-danger:hover { background: #791F1F; }
+    .btn-back { padding: 8px 16px; font-size: 13px; font-weight: 500; background: #EEEDF8; color: #534AB7; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-back:hover { background: #DDD9F3; }
+
+    /* ── QR layout ── */
+    .qr-layout { display: flex; gap: 36px; flex-wrap: wrap; }
+    .qr-left   { display: flex; flex-direction: column; align-items: center; min-width: 240px; flex: 0 0 auto; }
+    .qr-right  { flex: 1; min-width: 260px; }
+
+    .session-meta { width: 100%; background: #f4f4f0; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; font-size: 13px; }
+    .session-meta-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .session-meta-row:last-child { margin-bottom: 0; }
+    .meta-label { color: #73726c; }
+    .meta-value { font-weight: 500; }
+
+    .qr-img { width: 220px; height: 220px; border-radius: 12px; border: 1px solid #e0dfd8; }
+
+    /* ── Timer ── */
+    .timer-box { display: flex; align-items: center; gap: 8px; margin: 14px 0 6px; font-size: 15px; font-weight: 600; }
+    .timer-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; animation: pulse 1.2s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .timer-active  { color: #0F6E56; }
+    .timer-urgent  { color: #854F0B; }
+    .timer-expired { color: #A32D2D; }
+    .timer-expired .timer-dot { background: #A32D2D; animation: none; }
+    .timer-urgent  .timer-dot { background: #D97706; }
+
+    /* ── Live attendance ── */
+    .attendance-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .attendance-header h3 { font-size: 16px; font-weight: 600; }
+    .badge-count { background: #E1F5EE; color: #0F6E56; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+
+    .attendance-list { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
+    .attendance-row  { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #fafaf8; border: 1px solid #e0dfd8; border-radius: 8px; }
+    .roll-no       { font-size: 11px; color: #73726c; font-family: monospace; background: #EEEDF8; color: #534AB7; padding: 2px 7px; border-radius: 4px; margin-right: 8px; }
+    .student-name  { font-size: 14px; font-weight: 500; }
+    .scan-time     { font-size: 12px; color: #73726c; }
+
+    /* ── Session closed banner ── */
+    .closed-banner { background: #FCEBEB; border: 1px solid #f09595; border-radius: 10px; padding: 14px 18px; font-size: 14px; color: #791F1F; font-weight: 500; margin-top: 14px; text-align: center; }
+  </style>
 </head>
 <body>
 
-  <!-- Top navbar -->
   <nav class="navbar">
     <div class="nav-logo">
-      <span class="logo-mark">M</span>
+      <div class="logo-mark">M</div>
       <span class="logo-text">MarkMe</span>
+      <span class="nav-badge">Teacher</span>
     </div>
     <div class="nav-right">
       <span id="teacher-name" class="nav-user"></span>
@@ -22,8 +105,8 @@
 
   <main class="container">
 
-    <!-- Generate QR section -->
-    <section class="card">
+    <!-- ── Generate QR ── -->
+    <div class="card" id="generate-card">
       <h2>Start a session</h2>
       <p class="text-muted">Select a course to generate a QR code for today's class</p>
 
@@ -35,46 +118,94 @@
           </select>
         </div>
         <div class="field">
-          <label for="expiry">QR expiry</label>
+          <label for="expiry">QR expires after</label>
           <select id="expiry">
             <option value="5">5 minutes</option>
             <option value="10" selected>10 minutes</option>
             <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fence-radius">Geo-fence radius</label>
+          <select id="fence-radius">
+            <option value="50">50 m (strict)</option>
+            <option value="100" selected>100 m (standard)</option>
+            <option value="200">200 m (relaxed)</option>
+            <option value="500">500 m (campus-wide)</option>
           </select>
         </div>
       </div>
 
-      <div id="geo-status" class="geo-status"></div>
+      <!-- Geo status banner -->
+      <div id="geo-banner" class="geo-banner geo-loading">
+        📍 Getting your location...
+      </div>
 
-      <button id="generate-btn" onclick="generateQR()">
+      <button class="btn-primary" id="generate-btn" onclick="generateQR()">
         Generate QR code
       </button>
-    </section>
+    </div>
 
-    <!-- QR display section (hidden until generated) -->
-    <section class="card hidden" id="qr-section">
+    <!-- ── Active QR session ── -->
+    <div class="card hidden" id="qr-card">
+
+      <!-- Back button -->
+      <div style="margin-bottom:20px">
+        <button class="btn-back" onclick="backToHome()">
+          ← Back to home
+        </button>
+      </div>
+
       <div class="qr-layout">
 
+        <!-- Left: QR image + timer + controls -->
         <div class="qr-left">
-          <h2 id="qr-course-name"></h2>
-          <p class="text-muted">Show this on the projector. Students scan to mark attendance.</p>
+
+          <div class="session-meta" style="text-align:left">
+            <div class="session-meta-row">
+              <span class="meta-label">Course</span>
+              <span class="meta-value" id="qr-course-name"></span>
+            </div>
+            <div class="session-meta-row">
+              <span class="meta-label">Date</span>
+              <span class="meta-value" id="qr-date"></span>
+            </div>
+            <div class="session-meta-row">
+              <span class="meta-label">Geo-fence</span>
+              <span class="meta-value" id="qr-geo-info"></span>
+            </div>
+          </div>
+
           <img id="qr-image" src="" alt="QR code" class="qr-img">
-          <div id="timer" class="timer"></div>
-          <button class="btn-danger" onclick="closeSession()">Close session</button>
+
+          <div class="timer-box timer-active" id="timer-box">
+            <div class="timer-dot" id="timer-dot"></div>
+            <span id="timer-text">--:--</span>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;justify-content:center">
+            <button class="btn-danger" onclick="closeSession()">Close session</button>
+          </div>
+
+          <div class="closed-banner hidden" id="closed-banner">
+            Session closed — no more scans accepted
+          </div>
         </div>
 
+        <!-- Right: Live attendance list -->
         <div class="qr-right">
           <div class="attendance-header">
             <h3>Live attendance</h3>
             <span id="present-count" class="badge-count">0 present</span>
           </div>
           <div id="attendance-list" class="attendance-list">
-            <p class="text-muted">Waiting for scans...</p>
+            <p style="color:#73726c;font-size:14px">Waiting for scans...</p>
           </div>
         </div>
 
       </div>
-    </section>
+    </div>
 
   </main>
 
