@@ -114,4 +114,51 @@ router.patch('/:id/close', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/sessions/:id/share
+// Public endpoint — no auth required
+// Returns session info + QR image for the share page
+router.get('/:id/share', async (req, res) => {
+  try {
+    const sessions = await sql`
+      SELECT s.id, s.expires_at, s.is_active, s.qr_token,
+             c.name AS course_name, c.code AS course_code,
+             u.name AS teacher_name
+      FROM sessions s
+      JOIN courses c ON c.id = s.course_id
+      JOIN users   u ON u.id = s.teacher_id
+      WHERE s.id = ${req.params.id}
+    `;
+
+    if (!sessions.length) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const session = sessions[0];
+
+    // Check if expired or closed
+    const now       = new Date();
+    const expiresAt = new Date(session.expires_at);
+    const expired   = !session.is_active || now > expiresAt;
+
+    // Generate fresh QR image from the token
+    const qrImage = await qrcode.toDataURL(session.qr_token, {
+      width: 300, margin: 2,
+      color: { dark: '#1a1a18', light: '#ffffff' }
+    });
+
+    res.json({
+      course_name:  session.course_name,
+      course_code:  session.course_code,
+      teacher_name: session.teacher_name,
+      expires_at:   session.expires_at,
+      expired,
+      qr_image:     expired ? null : qrImage,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
