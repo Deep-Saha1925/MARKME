@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkMe — Scan Attendance</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f4f0;
+      color: #1a1a18;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0dfd8;
+      border-radius: 16px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .logo { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .logo-mark { width: 32px; height: 32px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .logo-text { font-size: 18px; font-weight: 600; }
+
+    .course-name  { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .course-meta  { font-size: 13px; color: #73726c; margin-bottom: 6px; }
+    .teacher-name { font-size: 13px; color: #73726c; margin-bottom: 20px; }
+
+    .qr-box { display: inline-block; padding: 12px; border: 1px solid #e0dfd8; border-radius: 12px; margin-bottom: 16px; background: #fff; }
+    .qr-box img { display: block; width: 220px; height: 220px; border-radius: 6px; }
+
+    /* Timer */
+    .timer-box { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 500; margin-bottom: 20px; }
+    .timer-dot  { width: 8px; height: 8px; border-radius: 50%; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .active  .timer-dot { background: #1D9E75; }
+    .urgent  .timer-dot { background: #D97706; }
+    .expired .timer-dot { background: #A32D2D; animation: none; }
+    .active  { color: #0F6E56; }
+    .urgent  { color: #854F0B; }
+    .expired { color: #791F1F; }
+
+    /* Buttons */
+    .btn-primary { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; background: #534AB7; color: #fff; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 10px; }
+    .btn-primary:hover { background: #3C3489; }
+    .btn-outline { width: 100%; padding: 11px; font-size: 14px; font-weight: 500; background: none; border: 1px solid #d3d1c7; color: #3d3d3a; border-radius: 10px; cursor: pointer; }
+    .btn-outline:hover { background: #f4f4f0; }
+
+    /* Expired state */
+    .expired-box { background: #FCEBEB; border: 1px solid #f09595; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .expired-icon { font-size: 32px; margin-bottom: 10px; }
+    .expired-text { font-size: 15px; font-weight: 500; color: #791F1F; }
+    .expired-sub  { font-size: 13px; color: #9c9a92; margin-top: 6px; }
+
+    /* Loading */
+    .loading { color: #73726c; font-size: 14px; padding: 40px 0; }
+
+    .footer { margin-top: 16px; font-size: 12px; color: #9c9a92; }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="card">
+    <div class="logo">
+      <div class="logo-mark">M</div>
+      <span class="logo-text">MarkMe</span>
+    </div>
+    <div class="loading" id="loading">Loading session...</div>
+    <div id="content" style="display:none"></div>
+  </div>
+
+  <div class="footer">MarkMe · QR Attendance System</div>
+
+  <script>
+    // Get session ID from URL: /pages/qr-share.html?session=123
+    const params    = new URLSearchParams(location.search);
+    const sessionId = params.get('session');
+    let timerInterval = null;
+
+    if (!sessionId) {
+      document.getElementById('loading').textContent = 'Invalid link — no session ID found.';
+    } else {
+      loadSession();
+    }
+
+    async function loadSession() {
+      try {
+        const res  = await fetch(`/api/sessions/${sessionId}/share`);
+        const data = await res.json();
+
+        document.getElementById('loading').style.display = 'none';
+        const content = document.getElementById('content');
+        content.style.display = 'block';
+
+        if (!res.ok || data.expired) {
+          content.innerHTML = `
+            <div class="expired-box">
+              <div class="expired-icon">⏱️</div>
+              <div class="expired-text">This QR has expired</div>
+              <div class="expired-sub">Ask your teacher to generate a new one</div>
+            </div>
+            <div class="course-name">${data.course_name || '—'}</div>
+            <div class="course-meta">${data.course_code || ''}</div>
+            <div class="teacher-name">by ${data.teacher_name || ''}</div>
+          `;
+          return;
+        }
+
+        // Set page title
+        document.title = `MarkMe — ${data.course_name}`;
+
+        content.innerHTML = `
+          <div class="course-name">${data.course_name}</div>
+          <div class="course-meta">${data.course_code}</div>
+          <div class="teacher-name">by ${data.teacher_name}</div>
+
+          <div class="qr-box">
+            <img id="qr-img" src="${data.qr_image}" alt="QR code for ${data.course_name}">
+          </div>
+
+          <div class="timer-box active" id="timer-box">
+            <div class="timer-dot"></div>
+            <span id="timer-text">Loading...</span>
+          </div>
+
+          <button class="btn-primary" onclick="downloadQR('${data.course_name}', '${data.course_code}')">
+            ⬇️ Download QR image
+          </button>
+          <button class="btn-outline" onclick="shareQR('${data.course_name}')">
+            🔗 Copy share link
+          </button>
+        `;
+
+        // Start countdown
+        startTimer(new Date(data.expires_at));
+
+      } catch (err) {
+        document.getElementById('loading').textContent = 'Could not load session. Check your connection.';
+      }
+    }
+
+    function startTimer(expiresAt) {
+      const timerText = document.getElementById('timer-text');
+      const timerBox  = document.getElementById('timer-box');
+      if (!timerText) return;
+
+      function tick() {
+        const remaining = Math.max(0, Math.floor((expiresAt - new Date()) / 1000));
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          timerText.textContent = 'QR expired — ask teacher for a new one';
+          timerBox.className    = 'timer-box expired';
+          document.getElementById('qr-img').style.opacity = '0.3';
+          return;
+        }
+        const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+        const s = String(remaining % 60).padStart(2, '0');
+        timerText.textContent = `Expires in ${m}:${s}`;
+        timerBox.className    = remaining <= 60 ? 'timer-box urgent' : 'timer-box active';
+      }
+
+      tick();
+      timerInterval = setInterval(tick, 1000);
+    }
+
+    function downloadQR(courseName, courseCode) {
+      const img    = document.getElementById('qr-img');
+      const canvas = document.createElement('canvas');
+      canvas.width  = 300;
+      canvas.height = 300;
+      const ctx = canvas.getContext('2d');
+      const image = new Image();
+      image.onload = () => {
+        ctx.drawImage(image, 0, 0, 300, 300);
+        const link    = document.createElement('a');
+        link.download = `MarkMe-QR-${courseCode}-${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.png`;
+        link.href     = canvas.toDataURL('image/png');
+        link.click();
+      };
+      image.src = img.src;
+    }
+
+    function shareQR(courseName) {
+      const url = location.href;
+      if (navigator.share) {
+        navigator.share({
+          title: 'MarkMe — Scan attendance for ' + courseName,
+          text:  'Scan QR to mark your attendance',
+          url,
+        }).catch(() => copyToClipboard(url));
+      } else {
+        copyToClipboard(url);
+      }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.btn-outline');
+        const original = btn.textContent;
+        btn.textContent = '✓ Link copied!';
+        setTimeout(() => btn.textContent = original, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
