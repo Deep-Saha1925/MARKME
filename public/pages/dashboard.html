@@ -188,6 +188,11 @@
             <button class="btn-danger" onclick="closeSession()">Close session</button>
           </div>
 
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center;width:100%">
+            <button class="btn-back" onclick="downloadQR()" style="flex:1">⬇️ Download</button>
+            <button class="btn-back" onclick="shareLink()" id="share-btn" style="flex:1">🔗 Share link</button>
+          </div>
+
           <div class="closed-banner hidden" id="closed-banner">
             Session closed — no more scans accepted
           </div>
