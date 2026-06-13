@@ -282,6 +282,49 @@ function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 }
 
+// ── Download QR as PNG ────────────────────────
+function downloadQR() {
+  const img    = document.getElementById('qr-image');
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 300;
+  const ctx   = canvas.getContext('2d');
+  const image = new Image();
+  image.onload = () => {
+    ctx.drawImage(image, 0, 0, 300, 300);
+    const link    = document.createElement('a');
+    const course  = document.getElementById('qr-course-name').textContent;
+    link.download = `MarkMe-QR-${course}-${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.png`;
+    link.href     = canvas.toDataURL('image/png');
+    link.click();
+  };
+  image.src = img.src;
+}
+
+// ── Share QR link ─────────────────────────────
+function shareLink() {
+  const url    = `${location.origin}/pages/qr-share.html?session=${currentSessionId}`;
+  const course = document.getElementById('qr-course-name').textContent;
+  const btn    = document.getElementById('share-btn');
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'MarkMe — Scan attendance for ' + course,
+      text:  'Scan QR to mark your attendance',
+      url,
+    }).catch(() => copyLink(url, btn));
+  } else {
+    copyLink(url, btn);
+  }
+}
+
+function copyLink(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    const original    = btn.textContent;
+    btn.textContent   = '✓ Copied!';
+    setTimeout(() => btn.textContent = original, 2000);
+  });
+}
+
 function logout() {
   localStorage.removeItem('markme_token');
   localStorage.removeItem('markme_user');
