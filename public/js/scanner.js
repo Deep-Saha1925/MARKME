@@ -376,62 +376,70 @@ async function submitScannedToken(decodedText) {
 }
 
 
+// async function onScanSuccess(decodedText) {
+//   if (scanning) return;
+//   scanning = true;
+//   stopScanner();
+
+//   // Get fresh location
+//   let location = window._lastLocation || null;
+//   window._lastLocation = null;
+//   if (!location) {
+//     location = await getCurrentLocation();
+//   }
+
+//   // ── Block immediately if no location ──
+//   if (!location.lat || !location.lng) {
+//     setStatus('❌ Location required — enable GPS and tap Retry before scanning', 'error');
+//     document.getElementById('retry-loc-btn').classList.remove('hidden');
+//     scanning = false;
+//     document.getElementById('start-btn').classList.remove('hidden');
+//     return;
+//   }
+
+//   setStatus('Verifying attendance...', 'info');
+
+//   try {
+//     const res  = await apiFetch('/api/attendance/scan', {
+//       method: 'POST',
+//       body: JSON.stringify({
+//         token:     decodedText,
+//         device_id: deviceId,
+//         lat:       location.lat,
+//         lng:       location.lng,
+//       })
+//     });
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       setStatus(data.error || 'Scan failed', 'error');
+//       scanning = false;
+//       document.getElementById('start-btn').classList.remove('hidden');
+//       return;
+//     }
+
+//     // Success
+//     document.getElementById('scan-view').classList.add('hidden');
+//     document.getElementById('success-view').classList.remove('hidden');
+//     document.getElementById('success-course').textContent = data.course_name;
+//     document.getElementById('success-time').textContent   = 'Marked at ' + formatTime(data.scanned_at);
+
+//     loadCourses();
+//     loadHistory();
+
+//   } catch {
+//     setStatus('Could not connect to server', 'error');
+//     scanning = false;
+//   }
+// }
+
 async function onScanSuccess(decodedText) {
   if (scanning) return;
   scanning = true;
   stopScanner();
-
-  // Get fresh location
-  let location = window._lastLocation || null;
-  window._lastLocation = null;
-  if (!location) {
-    location = await getCurrentLocation();
-  }
-
-  // ── Block immediately if no location ──
-  if (!location.lat || !location.lng) {
-    setStatus('❌ Location required — enable GPS and tap Retry before scanning', 'error');
-    document.getElementById('retry-loc-btn').classList.remove('hidden');
-    scanning = false;
-    document.getElementById('start-btn').classList.remove('hidden');
-    return;
-  }
-
-  setStatus('Verifying attendance...', 'info');
-
-  try {
-    const res  = await apiFetch('/api/attendance/scan', {
-      method: 'POST',
-      body: JSON.stringify({
-        token:     decodedText,
-        device_id: deviceId,
-        lat:       location.lat,
-        lng:       location.lng,
-      })
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      setStatus(data.error || 'Scan failed', 'error');
-      scanning = false;
-      document.getElementById('start-btn').classList.remove('hidden');
-      return;
-    }
-
-    // Success
-    document.getElementById('scan-view').classList.add('hidden');
-    document.getElementById('success-view').classList.remove('hidden');
-    document.getElementById('success-course').textContent = data.course_name;
-    document.getElementById('success-time').textContent   = 'Marked at ' + formatTime(data.scanned_at);
-
-    loadCourses();
-    loadHistory();
-
-  } catch {
-    setStatus('Could not connect to server', 'error');
-    scanning = false;
-  }
+  await submitScannedToken(decodedText);
 }
+
 
 function scanAgain() {
   scanning = false;
