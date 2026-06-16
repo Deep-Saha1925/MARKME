@@ -288,6 +288,94 @@ function stopScanner() {
   setStatus('', '');
 }
 
+// UPLOAD QR IMAGE
+async function handleQRUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  // Reset the input so picking the same file again still fires onchange
+  event.target.value = '';
+  if (!file) return;
+
+  if (scanning) return;
+  scanning = true;
+
+  // Stop camera if it's running
+  if (scanner) {
+    try { await scanner.stop(); } catch {}
+    scanner = null;
+    document.getElementById('start-btn').classList.remove('hidden');
+    document.getElementById('stop-btn').classList.add('hidden');
+  }
+
+  setStatus('Reading QR from image...', 'info');
+
+  // html5-qrcode needs a fresh instance for file scanning
+  const fileScanner = new Html5Qrcode('qr-reader');
+  let decodedText;
+  try {
+    decodedText = await fileScanner.scanFile(file, /* showImage */ false);
+  } catch (err) {
+    setStatus('❌ No QR code found in this image. Try a clearer photo.', 'error');
+    scanning = false;
+    return;
+  } finally {
+    try { await fileScanner.clear(); } catch {}
+  }
+
+  // From here on — identical flow to the camera path
+  await submitScannedToken(decodedText);
+}
+
+// Extracted so camera + upload share one code path.
+// Replace the body of onScanSuccess to call this too (see below).
+async function submitScannedToken(decodedText) {
+  // Fresh GPS (same rules as camera)
+  let location = window._lastLocation || null;
+  window._lastLocation = null;
+  if (!location) location = await getCurrentLocation();
+
+  if (!location.lat || !location.lng) {
+    setStatus('❌ Location required — enable GPS and tap Retry before scanning', 'error');
+    document.getElementById('retry-loc-btn').classList.remove('hidden');
+    scanning = false;
+    document.getElementById('start-btn').classList.remove('hidden');
+    return;
+  }
+
+  setStatus('Verifying attendance...', 'info');
+
+  try {
+    const res  = await apiFetch('/api/attendance/scan', {
+      method: 'POST',
+      body: JSON.stringify({
+        token:     decodedText,
+        device_id: deviceId,
+        lat:       location.lat,
+        lng:       location.lng,
+      })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setStatus(data.error || 'Scan failed', 'error');
+      scanning = false;
+      document.getElementById('start-btn').classList.remove('hidden');
+      return;
+    }
+
+    document.getElementById('scan-view').classList.add('hidden');
+    document.getElementById('success-view').classList.remove('hidden');
+    document.getElementById('success-course').textContent = data.course_name;
+    document.getElementById('success-time').textContent   = 'Marked at ' + formatTime(data.scanned_at);
+
+    loadCourses();
+    loadHistory();
+  } catch {
+    setStatus('Could not connect to server', 'error');
+    scanning = false;
+  }
+}
+
+
 async function onScanSuccess(decodedText) {
   if (scanning) return;
   scanning = true;
