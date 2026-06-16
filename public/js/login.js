@@ -22,7 +22,6 @@ async function handleLogin() {
     });
 
     const data = await res.json();
-    console.log(data);
 
     if (!res.ok) {
       showError(data.error || 'Login failed');
