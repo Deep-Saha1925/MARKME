@@ -27,7 +27,7 @@
     .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 14px; padding: 20px; margin-bottom: 16px; }
     .hidden { display: none !important; }
 
-    /* ── Home ── */
+    /* Home */
     .welcome-banner { background: linear-gradient(135deg, #534AB7, #7B74D4); border-radius: 14px; padding: 20px; color: #fff; margin-bottom: 16px; }
     .welcome-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
     .welcome-sub  { font-size: 13px; opacity: 0.8; }
@@ -39,7 +39,7 @@
     .stat-label { font-size: 12px; color: #73726c; margin-top: 2px; }
     .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
 
-    /* ── Course cards ── */
+    /* Course cards */
     .course-card   { border: 1px solid #e0dfd8; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: #fff; }
     .course-top    { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
     .course-name   { font-size: 14px; font-weight: 600; }
@@ -52,21 +52,36 @@
     .bar-fill      { height: 5px; border-radius: 4px; transition: width 0.5s ease; }
     .course-detail { font-size: 12px; color: #73726c; margin-top: 6px; }
 
-    /* ── Scanner ── */
+    /* Scanner */
     .scanner-hero    { text-align: center; margin-bottom: 16px; }
     .scanner-hero h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
     .scanner-hero p  { font-size: 13px; color: #73726c; }
     .qr-wrapper  { border-radius: 16px; overflow: hidden; background: #1a1a18; margin-bottom: 14px; min-height: 260px; }
     #qr-reader   { width: 100%; }
 
-    /* ── Location banner ── */
+    /* OR divider */
+    .or-divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+    .or-divider::before, .or-divider::after { content: ''; flex: 1; border-top: 1px solid #e0dfd8; }
+    .or-divider span { font-size: 12px; color: #9c9a92; font-weight: 500; }
+
+    /* Upload zone */
+    .upload-zone { border: 2px dashed #d3d1c7; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 12px; background: #fafaf8; }
+    .upload-zone:hover { border-color: #534AB7; background: #EEEDF8; }
+    .upload-zone.drag-over { border-color: #534AB7; background: #EEEDF8; }
+    .upload-zone input { display: none; }
+    .upload-icon  { font-size: 28px; margin-bottom: 6px; }
+    .upload-label { font-size: 14px; font-weight: 500; color: #3d3d3a; margin-bottom: 3px; }
+    .upload-hint  { font-size: 12px; color: #9c9a92; }
+    .upload-processing { font-size: 13px; color: #185FA5; margin-top: 6px; font-weight: 500; }
+
+    /* Location banner */
     .loc-banner { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; text-align: center; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .loc-banner.info    { background: #E0EDFB; color: #185FA5; }
     .loc-banner.success { background: #E1F5EE; color: #0F6E56; }
     .loc-banner.warning { background: #FAEEDA; color: #854F0B; }
     .loc-banner.error   { background: #FCEBEB; color: #791F1F; border: 1px solid #f09595; }
 
-    /* ── HTTPS warning ── */
+    /* HTTPS warning */
     .https-warning { background: #FFF4E0; border: 1px solid #F6B500; border-radius: 12px; padding: 18px; margin-bottom: 16px; text-align: center; }
     .https-warning .warn-icon { font-size: 28px; margin-bottom: 8px; }
     .https-warning h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #7A4F00; }
@@ -84,14 +99,15 @@
     .btn-outline { width: 100%; padding: 11px; font-size: 14px; font-weight: 500; background: none; border: 1px solid #d3d1c7; color: #3d3d3a; border-radius: 10px; cursor: pointer; margin-top: 8px; }
     .btn-outline:hover { background: #f4f4f0; }
 
-    /* ── Success ── */
+    /* Success */
     .success-screen { text-align: center; padding: 10px 0; }
     .success-circle { width: 64px; height: 64px; background: #E1F5EE; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
     .success-title  { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
     .success-course { font-size: 15px; color: #534AB7; font-weight: 500; margin-bottom: 4px; }
     .success-time   { font-size: 13px; color: #73726c; margin-bottom: 20px; }
+    .success-method { font-size: 12px; color: #9c9a92; margin-bottom: 20px; }
 
-    /* ── History ── */
+    /* History */
     .filter-bar   { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .filter-chip  { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1px solid #d3d1c7; background: #fff; cursor: pointer; color: #3d3d3a; transition: all 0.12s; }
     .filter-chip.active { background: #534AB7; color: #fff; border-color: #534AB7; }
@@ -104,7 +120,7 @@
     .att-present { background: #E1F5EE; color: #0F6E56; }
     .att-absent  { background: #FCEBEB; color: #791F1F; }
 
-    /* ── Profile ── */
+    /* Profile */
     .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: #EEEDF8; color: #534AB7; font-size: 24px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
     .profile-name   { text-align: center; font-size: 18px; font-weight: 600; margin-bottom: 4px; }
     .profile-roll   { text-align: center; font-size: 13px; color: #73726c; margin-bottom: 20px; }
@@ -130,7 +146,7 @@
     </div>
   </nav>
 
-  <!-- ── HOME ── -->
+  <!-- HOME -->
   <div class="page active" id="page-home">
     <div class="welcome-banner">
       <div class="welcome-name">Hi, <span id="home-name">Student</span> 👋</div>
@@ -149,52 +165,47 @@
     <div id="home-courses"><div class="empty-state"><div class="empty-icon">📚</div>Loading courses...</div></div>
   </div>
 
-  <!-- ── SCAN ── -->
+  <!-- SCAN -->
   <div class="page" id="page-scan">
 
-    <!-- HTTPS warning — shown only on HTTP non-localhost -->
     <div class="https-warning hidden" id="https-warning">
       <div class="warn-icon">⚠️</div>
       <h3>Location blocked — HTTPS required</h3>
-      <p>
-        Browsers block GPS on plain HTTP. To fix this for testing,
-        run <code>ngrok http 3000</code> and open the
-        <code>https://</code> URL on your phone instead.
-      </p>
+      <p>Browsers block GPS on plain HTTP. Run <code>ngrok http 3000</code> and open the <code>https://</code> URL on your phone.</p>
     </div>
 
-    <!-- Scanner view -->
     <div id="scan-view">
       <div class="scanner-hero">
-        <h2>Scan QR code</h2>
-        <p>Point your camera at the QR on the projector</p>
+        <h2>Mark attendance</h2>
+        <p>Scan QR with camera or upload a QR image</p>
       </div>
 
-      <!-- Location status banner -->
       <div id="loc-banner" class="loc-banner info hidden"></div>
-
-      <!-- Retry location button -->
-      <button class="btn-outline hidden" id="retry-loc-btn"
-        onclick="retryLocation()" style="margin-bottom:12px">
+      <button class="btn-outline hidden" id="retry-loc-btn" onclick="retryLocation()" style="margin-bottom:12px">
         📍 Retry location
       </button>
 
+      <!-- Camera scanner -->
       <div class="qr-wrapper"><div id="qr-reader"></div></div>
       <div id="scan-status" class="scan-status"></div>
 
-      <button class="btn-primary" id="start-btn" onclick="startScanner()">Start camera</button>
+      <button class="btn-primary" id="start-btn" onclick="startScanner()">📷 Start camera</button>
       <button class="btn-outline hidden" id="stop-btn" onclick="stopScanner()">Stop camera</button>
 
-      <!-- NEW: upload QR image -->
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;align-items:center">
-        <div style="font-size:12px;color:#73726c">— or —</div>
-        <label for="qr-file-input"
-              id="upload-btn"
-              style="padding:11px 24px;font-size:14px;font-weight:500;background:#EEEDF8;color:#534AB7;border:1px solid #534AB7;border-radius:8px;cursor:pointer;display:inline-block">
-          📁 Upload QR image
-        </label>
-        <input id="qr-file-input" type="file" accept="image/*"
-              style="display:none" onchange="handleQRUpload(event)">
+      <!-- OR divider -->
+      <div class="or-divider"><span>OR</span></div>
+
+      <!-- Upload QR image (like UPI) -->
+      <div class="upload-zone" id="upload-zone"
+        onclick="document.getElementById('qr-file-input').click()"
+        ondragover="handleUploadDragOver(event)"
+        ondragleave="handleUploadDragLeave()"
+        ondrop="handleUploadDrop(event)">
+        <input type="file" id="qr-file-input" accept="image/*" onchange="handleUploadFile(event)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-label">Upload QR image</div>
+        <div class="upload-hint">Tap to browse gallery · or drag & drop</div>
+        <div class="upload-processing hidden" id="upload-processing">⏳ Reading QR code...</div>
       </div>
 
     </div>
@@ -207,7 +218,8 @@
           <div class="success-title">Attendance marked!</div>
           <div class="success-course" id="success-course"></div>
           <div class="success-time"   id="success-time"></div>
-          <button class="btn-primary" onclick="scanAgain()">Scan another class</button>
+          <div class="success-method" id="success-method"></div>
+          <button class="btn-primary" onclick="scanAgain()">Mark another class</button>
           <button class="btn-outline" onclick="switchTab('home')" style="margin-top:8px">Go to home</button>
         </div>
       </div>
@@ -215,7 +227,7 @@
 
   </div>
 
-  <!-- ── HISTORY ── -->
+  <!-- HISTORY -->
   <div class="page" id="page-history">
     <div class="section-title" style="margin-bottom:14px">Attendance history</div>
     <div class="filter-bar">
@@ -228,7 +240,7 @@
     </div>
   </div>
 
-  <!-- ── PROFILE ── -->
+  <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="card" style="margin-bottom:16px">
       <div class="profile-avatar" id="profile-avatar">—</div>
@@ -240,44 +252,29 @@
       <div class="section-title" style="margin-bottom:14px">Course summary</div>
       <div id="profile-courses"><div class="empty-state"><div class="empty-icon">📚</div>Loading...</div></div>
     </div>
-    
-    <!-- Change password card -->
     <div class="card" style="margin-bottom:16px">
       <div class="section-title" style="margin-bottom:14px">Change password</div>
       <div id="pwd-msg"></div>
       <div style="display:flex;flex-direction:column;gap:12px">
         <div>
-          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">
-            Current password
-          </label>
-          <input type="password" id="pwd-current" placeholder="Your current password"
-            style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
+          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">Current password</label>
+          <input type="password" id="pwd-current" placeholder="Your current password" style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
         </div>
         <div>
-          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">
-            New password
-          </label>
-          <input type="password" id="pwd-new" placeholder="Min. 8 characters"
-            style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
+          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">New password</label>
+          <input type="password" id="pwd-new" placeholder="Min. 8 characters" style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
         </div>
         <div>
-          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">
-            Confirm new password
-          </label>
-          <input type="password" id="pwd-confirm" placeholder="Repeat new password"
-            style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
+          <label style="font-size:13px;font-weight:500;color:#3d3d3a;display:block;margin-bottom:5px">Confirm new password</label>
+          <input type="password" id="pwd-confirm" placeholder="Repeat new password" style="width:100%;padding:10px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#fafaf8;outline:none;font-family:inherit">
         </div>
-        <button class="btn-primary" id="pwd-btn" onclick="changePassword()">
-          Update password
-        </button>
+        <button class="btn-primary" id="pwd-btn" onclick="changePassword()">Update password</button>
       </div>
     </div>
-
     <button class="btn-outline" onclick="logout()" style="margin-top:4px">Sign out</button>
-
   </div>
 
-  <!-- ── TAB BAR ── -->
+  <!-- TAB BAR -->
   <nav class="tab-bar">
     <button class="tab-item active" onclick="switchTab('home')"    id="tab-home"><span class="tab-icon">🏠</span>Home</button>
     <button class="tab-item"        onclick="switchTab('scan')"    id="tab-scan"><span class="tab-icon">📷</span>Scan</button>
