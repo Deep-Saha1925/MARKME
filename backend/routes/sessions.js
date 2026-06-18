@@ -39,7 +39,7 @@ router.post('/generate', authMiddleware, async (req, res) => {
       VALUES
         (${course_id}, ${req.user.id}, ${token},
          ${lat || null}, ${lng || null},
-         ${fence_radius_m || 100}, ${expiresAt})
+         ${fence_radius_m || 20}, ${expiresAt})
       RETURNING *
     `;
     const session = sessions[0];
