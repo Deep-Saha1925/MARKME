@@ -4,6 +4,7 @@
   "description": "A QR-based attendance system for colleges. Teachers generate a QR code at the start of each class, students scan it on their phones to mark attendance — no paper, no proxies.",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon ./backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
