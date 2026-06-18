@@ -1,5 +1,3 @@
-// public/js/dashboard.js
-
 const token = localStorage.getItem('markme_token');
 const user  = JSON.parse(localStorage.getItem('markme_user') || '{}');
 if (!token) window.location.href = '/pages/login.html';
@@ -7,7 +5,7 @@ if (!token) window.location.href = '/pages/login.html';
 document.getElementById('teacher-name').textContent = user.name || '';
 
 let currentSessionId   = null;
-let attendanceData     = []; // kept in memory for CSV + print
+let attendanceData     = [];
 let attendanceInterval = null;
 let timerInterval      = null;
 let userLat            = null;
@@ -42,40 +40,69 @@ async function loadCourses() {
 
 // ─────────────────────────────────────────────
 // LOCATION
+// FIX: use window.location.protocol explicitly
+// to avoid conflict with any local variable named
+// 'location'. Also re-requests on every backToHome()
+// so a stale position is never used.
 // ─────────────────────────────────────────────
 function getLocation() {
+  // 1. API not available
   if (!navigator.geolocation) {
-    setBanner('geo-warn', '⚠️ Location not supported — geo-fence will be skipped');
+    setBanner('geo-warn', '⚠️ Location not supported on this device — geo-fence will be skipped');
     return;
   }
-  const isHTTP      = location.protocol === 'http:';
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+  // 2. HTTP on non-localhost — browser silently blocks GPS
+  const proto       = window.location.protocol;   // ← use window.location explicitly
+  const host        = window.location.hostname;
+  const isHTTP      = proto === 'http:';
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+
   if (isHTTP && !isLocalhost) {
-    setBanner('geo-warn', '⚠️ GPS blocked on HTTP — use ngrok HTTPS for geo-fence');
+    setBanner('geo-warn', '⚠️ GPS blocked on HTTP — run ngrok and use the https:// URL for geo-fence to work');
     return;
   }
+
+  // 3. Request GPS
   setBanner('geo-loading', '📍 Getting your location...');
+
   navigator.geolocation.getCurrentPosition(
     pos => {
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
       const acc = Math.round(pos.coords.accuracy);
-      setBanner('geo-ok', `✓ Location captured (±${acc}m) — geo-fence active`);
+
+      if (acc <= 50) {
+        setBanner('geo-ok', `✓ Location captured (±${acc}m) — geo-fence active`);
+      } else if (acc <= 200) {
+        setBanner('geo-ok', `✓ Location captured (±${acc}m accuracy) — geo-fence active`);
+      } else {
+        // Very poor accuracy — warn but still store coords
+        setBanner('geo-warn', `⚠️ Low GPS accuracy (±${acc}m) — move near a window for better accuracy`);
+      }
     },
     err => {
+      // Reset coords so we don't use stale values from a previous session
+      userLat = null;
+      userLng = null;
+
       const msgs = {
-        1: '⚠️ Location denied — geo-fence will be skipped',
-        2: '⚠️ Location unavailable — geo-fence will be skipped',
-        3: '⚠️ Location timed out — geo-fence will be skipped',
+        1: '⚠️ Location permission denied — allow location in browser settings. Geo-fence will be skipped.',
+        2: '⚠️ Location unavailable — make sure GPS is enabled. Geo-fence will be skipped.',
+        3: '⚠️ Location timed out — refresh the page to try again. Geo-fence will be skipped.',
       };
-      setBanner('geo-warn', msgs[err.code] || '⚠️ Location error');
+      setBanner('geo-warn', msgs[err.code] || '⚠️ Location error — geo-fence will be skipped');
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    {
+      enableHighAccuracy: true,  // use GPS chip, not just WiFi/cell towers
+      timeout:            12000, // 12 seconds — teachers are usually on WiFi, GPS is slower indoors
+      maximumAge:         0,     // always fresh — never use cached position
+    }
   );
 }
 
 function setBanner(type, msg) {
-  const b = document.getElementById('geo-banner');
+  const b   = document.getElementById('geo-banner');
   b.className   = 'geo-banner ' + type;
   b.textContent = msg;
 }
@@ -117,14 +144,17 @@ async function generateQR() {
 
   const sel         = document.getElementById('course-select');
   sessionCourseName = sel.options[sel.selectedIndex].text;
-  sessionDate       = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  sessionDate       = new Date().toLocaleDateString('en-IN', {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+  });
 
   document.getElementById('qr-course-name').textContent = sessionCourseName;
   document.getElementById('qr-date').textContent        = sessionDate;
-  document.getElementById('qr-geo-info').textContent    = userLat ? `Active · ${fenceRadius}m radius` : 'Not active (no location)';
-  document.getElementById('qr-image').src               = data.qr_image;
+  document.getElementById('qr-geo-info').textContent    = userLat
+    ? `Active · ${fenceRadius}m radius`
+    : 'Not active (location unavailable)';
+  document.getElementById('qr-image').src = data.qr_image;
 
-  // Update print header
   document.getElementById('print-meta').textContent =
     `${sessionCourseName} · ${sessionDate} · Printed by ${user.name || 'Teacher'}`;
 
@@ -145,6 +175,7 @@ function startTimer(seconds) {
   const timerBox  = document.getElementById('timer-box');
   let remaining   = seconds;
   clearInterval(timerInterval);
+
   timerInterval = setInterval(() => {
     if (remaining <= 0) {
       clearInterval(timerInterval);
@@ -175,9 +206,7 @@ async function fetchAttendance() {
   if (!res.ok) return;
   const data = await res.json();
 
-  // Keep in memory for CSV + print
   attendanceData = data;
-
   document.getElementById('present-count').textContent = `${data.length} present`;
 
   const list = document.getElementById('attendance-list');
@@ -200,18 +229,12 @@ async function fetchAttendance() {
 // EXPORT CSV
 // ─────────────────────────────────────────────
 function exportCSV() {
-  if (!attendanceData.length) {
-    alert('No attendance data to export yet.');
-    return;
-  }
+  if (!attendanceData.length) { alert('No attendance data to export yet.'); return; }
 
-  // Build CSV string
-  const header = 'Roll No,Name,Time,Status';
-  const rows   = attendanceData.map(r =>
+  const header  = 'Roll No,Name,Time,Status';
+  const rows    = attendanceData.map(r =>
     `${r.roll_no},"${r.student_name}",${formatTime(r.scanned_at)},Present`
   );
-
-  // Add summary at bottom
   const summary = [
     '',
     `Course,${sessionCourseName}`,
@@ -221,16 +244,13 @@ function exportCSV() {
     `Exported at,${new Date().toLocaleString('en-IN')}`,
   ];
 
-  const csvContent = [header, ...rows, ...summary].join('\n');
-
-  // Trigger download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const blob       = new Blob([[header, ...rows, ...summary].join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url        = URL.createObjectURL(blob);
+  const link       = document.createElement('a');
   const courseSafe = sessionCourseName.replace(/[^a-zA-Z0-9]/g, '-');
   const dateSafe   = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');
-  link.href     = url;
-  link.download = `MarkMe-${courseSafe}-${dateSafe}.csv`;
+  link.href        = url;
+  link.download    = `MarkMe-${courseSafe}-${dateSafe}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -239,12 +259,8 @@ function exportCSV() {
 // PRINT ATTENDANCE
 // ─────────────────────────────────────────────
 function printAttendance() {
-  if (!attendanceData.length) {
-    alert('No attendance data to print yet.');
-    return;
-  }
+  if (!attendanceData.length) { alert('No attendance data to print yet.'); return; }
 
-  // Build a clean print window
   const rows = attendanceData.map((r, i) => `
     <tr>
       <td>${i + 1}</td>
@@ -261,7 +277,7 @@ function printAttendance() {
     <head>
       <title>MarkMe — Attendance Report</title>
       <style>
-        body { font-family: system-ui, sans-serif; padding: 32px; color: #1a1a18; }
+        body    { font-family: system-ui, sans-serif; padding: 32px; color: #1a1a18; }
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #1a1a18; padding-bottom: 16px; }
         .logo   { font-size: 22px; font-weight: 700; }
         .logo span { color: #534AB7; }
@@ -272,9 +288,9 @@ function printAttendance() {
         th      { background: #f4f4f0; text-align: left; padding: 10px 12px; font-weight: 600; border-bottom: 1px solid #d3d1c7; }
         td      { padding: 10px 12px; border-bottom: 1px solid #e0dfd8; }
         tr:last-child td { border-bottom: none; }
-        .footer { margin-top: 24px; font-size: 12px; color: #9c9a92; text-align: center; border-top: 1px solid #e0dfd8; padding-top: 12px; }
         .summary { margin-top: 20px; background: #f4f4f0; padding: 12px 16px; border-radius: 8px; font-size: 13px; display: flex; gap: 32px; }
         .summary strong { display: block; font-size: 11px; color: #73726c; font-weight: 500; margin-bottom: 2px; }
+        .footer { margin-top: 24px; font-size: 12px; color: #9c9a92; text-align: center; border-top: 1px solid #e0dfd8; padding-top: 12px; }
       </style>
     </head>
     <body>
@@ -286,31 +302,20 @@ function printAttendance() {
           Printed at: ${new Date().toLocaleTimeString('en-IN')}
         </div>
       </div>
-
       <h2>${sessionCourseName}</h2>
       <p class="sub">Attendance Report · ${sessionDate}</p>
-
       <table>
         <thead>
-          <tr>
-            <th>#</th>
-            <th>Roll No</th>
-            <th>Name</th>
-            <th>Scan Time</th>
-            <th>Status</th>
-          </tr>
+          <tr><th>#</th><th>Roll No</th><th>Name</th><th>Scan Time</th><th>Status</th></tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
-
       <div class="summary">
         <div><strong>Total present</strong>${attendanceData.length}</div>
         <div><strong>Course</strong>${sessionCourseName}</div>
-        <div><strong>Session date</strong>${sessionDate}</div>
+        <div><strong>Date</strong>${sessionDate}</div>
       </div>
-
       <div class="footer">Generated by MarkMe · QR Attendance System</div>
-
       <script>window.onload = () => { window.print(); }<\/script>
     </body>
     </html>
@@ -345,15 +350,20 @@ function backToHome() {
   currentSessionId = null;
   sessionClosed    = false;
   attendanceData   = [];
-  document.getElementById('qr-image').src = '';
-  document.getElementById('timer-text').textContent = '--:--';
-  document.getElementById('timer-box').className    = 'timer-box timer-active';
+  userLat          = null;  // ← reset coords so stale location isn't reused
+  userLng          = null;
+
+  document.getElementById('qr-image').src              = '';
+  document.getElementById('timer-text').textContent    = '--:--';
+  document.getElementById('timer-box').className       = 'timer-box timer-active';
   document.getElementById('attendance-list').innerHTML = '<p style="color:#73726c;font-size:14px">Waiting for scans...</p>';
   document.getElementById('present-count').textContent = '0 present';
   document.getElementById('closed-banner').classList.add('hidden');
   document.getElementById('close-btn').classList.remove('hidden');
   document.getElementById('qr-card').classList.add('hidden');
   document.getElementById('generate-card').classList.remove('hidden');
+
+  // Re-fetch location fresh for the next session
   getLocation();
 }
 
@@ -381,7 +391,7 @@ function downloadQR() {
 // SHARE LINK
 // ─────────────────────────────────────────────
 function shareLink() {
-  const url = `${location.origin}/pages/qr-share.html?session=${currentSessionId}`;
+  const url = `${window.location.origin}/pages/qr-share.html?session=${currentSessionId}`;
   const btn = document.getElementById('share-btn');
   if (navigator.share) {
     navigator.share({
@@ -393,6 +403,7 @@ function shareLink() {
     copyLink(url, btn);
   }
 }
+
 function copyLink(url, btn) {
   navigator.clipboard.writeText(url).then(() => {
     const original  = btn.textContent;
@@ -407,12 +418,18 @@ function copyLink(url, btn) {
 function apiFetch(url, options = {}) {
   return fetch(url, {
     ...options,
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(options.headers || {}) }
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...(options.headers || {}),
+    }
   });
 }
+
 function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 }
+
 function logout() {
   localStorage.removeItem('markme_token');
   localStorage.removeItem('markme_user');
