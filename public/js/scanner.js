@@ -1,5 +1,3 @@
-// public/js/scanner.js
-
 const token = localStorage.getItem('markme_token');
 const user  = JSON.parse(localStorage.getItem('markme_user') || '{}');
 if (!token) window.location.href = '/pages/login.html';
@@ -64,14 +62,14 @@ function hideLocBanner() {
 function getCurrentLocation() {
   return new Promise(resolve => {
     if (!navigator.geolocation) {
-      showLocBanner('warning', '⚠️ Location not supported — geo-fence skipped');
+      showLocBanner('warning', 'Location not supported — geo-fence skipped');
       resolve({ lat: null, lng: null });
       return;
     }
     const isHTTP      = location.protocol === 'http:';
     const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
     if (isHTTP && !isLocalhost) {
-      showLocBanner('error', '❌ GPS blocked on HTTP — open site over HTTPS');
+      showLocBanner('error', 'GPS blocked on HTTP — open site over HTTPS');
       resolve({ lat: null, lng: null });
       return;
     }
@@ -90,11 +88,11 @@ function getCurrentLocation() {
       },
       err => {
         const msgs = {
-          1: '❌ Location denied — allow location in browser settings',
-          2: '❌ Location unavailable — check GPS is on',
-          3: '❌ Location timed out — move to open area and retry',
+          1: 'Location denied — allow location in browser settings',
+          2: 'Location unavailable — check GPS is on',
+          3: 'Location timed out — move to open area and retry',
         };
-        showLocBanner('error', msgs[err.code] || '❌ Location error');
+        showLocBanner('error', msgs[err.code] || 'Location error');
         document.getElementById('retry-loc-btn').classList.remove('hidden');
         resolve({ lat: null, lng: null });
       },
@@ -109,9 +107,7 @@ async function retryLocation() {
   window._lastLocation = loc;
 }
 
-// ─────────────────────────────────────────────
 // SUBMIT SCAN — shared by camera + upload
-// ─────────────────────────────────────────────
 async function submitScan(decodedText, method) {
   // Get fresh location (or use retried one)
   let location = window._lastLocation || null;
@@ -120,7 +116,7 @@ async function submitScan(decodedText, method) {
 
   // Block if no location
   if (!location.lat || !location.lng) {
-    setStatus('❌ Location required — enable GPS and tap Retry', 'error');
+    setStatus('Location required — enable GPS and tap Retry', 'error');
     document.getElementById('retry-loc-btn').classList.remove('hidden');
     scanning = false;
     document.getElementById('start-btn').classList.remove('hidden');
@@ -165,9 +161,7 @@ async function submitScan(decodedText, method) {
   }
 }
 
-// ─────────────────────────────────────────────
 // CAMERA SCANNER
-// ─────────────────────────────────────────────
 function startScanner() {
   hideLocBanner();
   document.getElementById('retry-loc-btn').classList.add('hidden');
@@ -206,9 +200,7 @@ async function onScanSuccess(decodedText) {
   await submitScan(decodedText, 'camera');
 }
 
-// ─────────────────────────────────────────────
-// UPLOAD QR IMAGE — like UPI
-// ─────────────────────────────────────────────
+// UPLOAD QR IMAGE
 function handleUploadDragOver(e) {
   e.preventDefault();
   document.getElementById('upload-zone').classList.add('drag-over');
@@ -244,7 +236,7 @@ async function processUploadedQR(file) {
     document.getElementById('upload-processing').classList.add('hidden');
 
     if (!decodedText) {
-      setStatus('❌ No QR code found in this image. Try a clearer photo.', 'error');
+      setStatus('No QR code found in this image. Try a clearer photo.', 'error');
       scanning = false;
       return;
     }
@@ -253,7 +245,7 @@ async function processUploadedQR(file) {
 
   } catch (err) {
     document.getElementById('upload-processing').classList.add('hidden');
-    setStatus('❌ Could not read QR from image. Make sure the QR is clear and fully visible.', 'error');
+    setStatus('Could not read QR from image. Make sure the QR is clear and fully visible.', 'error');
     scanning = false;
   }
 }
