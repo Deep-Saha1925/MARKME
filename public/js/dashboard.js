@@ -13,6 +13,7 @@ let userLng            = null;
 let sessionClosed      = false;
 let sessionCourseName  = '';
 let sessionDate        = '';
+let locationPending    = false;   // true while GPS request is in-flight
 
 // ─────────────────────────────────────────────
 // INIT
@@ -40,71 +41,98 @@ async function loadCourses() {
 
 // ─────────────────────────────────────────────
 // LOCATION
-// FIX: use window.location.protocol explicitly
-// to avoid conflict with any local variable named
-// 'location'. Also re-requests on every backToHome()
-// so a stale position is never used.
 // ─────────────────────────────────────────────
 function getLocation() {
-  // 1. API not available
+  // 1. API not available at all
   if (!navigator.geolocation) {
-    setBanner('geo-warn', '⚠️ Location not supported on this device — geo-fence will be skipped');
+    setBanner('geo-warn',
+      '⚠️ Location not supported on this device — geo-fence will be skipped',
+      false);
     return;
   }
 
-  // 2. HTTP on non-localhost — browser silently blocks GPS
-  const proto       = window.location.protocol;   // ← use window.location explicitly
+  // 2. HTTP on non-localhost blocks GPS silently in most browsers
+  const proto       = window.location.protocol;
   const host        = window.location.hostname;
   const isHTTP      = proto === 'http:';
   const isLocalhost = host === 'localhost' || host === '127.0.0.1';
 
   if (isHTTP && !isLocalhost) {
-    setBanner('geo-warn', '⚠️ GPS blocked on HTTP — run ngrok and use the https:// URL for geo-fence to work');
+    setBanner('geo-warn',
+      '⚠️ GPS blocked on HTTP — use the https:// URL (e.g. via ngrok) for geo-fence to work',
+      false);
     return;
   }
 
-  // 3. Request GPS
-  setBanner('geo-loading', '📍 Getting your location...');
+  // 3. Request GPS — mark as pending so generateQR() can guard against it
+  locationPending = true;
+  userLat = null;
+  userLng = null;
+  setBanner('geo-loading', '📍 Getting your location…', false);
 
   navigator.geolocation.getCurrentPosition(
     pos => {
+      locationPending = false;
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
       const acc = Math.round(pos.coords.accuracy);
 
       if (acc <= 50) {
-        setBanner('geo-ok', `✓ Location captured (±${acc}m) — geo-fence active`);
+        setBanner('geo-ok', `✓ Location captured (±${acc}m) — geo-fence active`, false);
       } else if (acc <= 200) {
-        setBanner('geo-ok', `✓ Location captured (±${acc}m accuracy) — geo-fence active`);
+        setBanner('geo-ok', `✓ Location captured (±${acc}m accuracy) — geo-fence active`, false);
       } else {
-        // Very poor accuracy — warn but still store coords
-        setBanner('geo-warn', `⚠️ Low GPS accuracy (±${acc}m) — move near a window for better accuracy`);
+        // Very poor accuracy but still usable
+        setBanner('geo-warn',
+          `⚠️ Low GPS accuracy (±${acc}m) — move near a window for better results`,
+          false);
       }
     },
     err => {
-      // Reset coords so we don't use stale values from a previous session
+      locationPending = false;
       userLat = null;
       userLng = null;
 
       const msgs = {
         1: '⚠️ Location permission denied — allow location in browser settings. Geo-fence will be skipped.',
-        2: '⚠️ Location unavailable — make sure GPS is enabled. Geo-fence will be skipped.',
-        3: '⚠️ Location timed out — refresh the page to try again. Geo-fence will be skipped.',
+        2: '⚠️ Location unavailable — make sure GPS/Wi-Fi is enabled. Geo-fence will be skipped.',
+        3: '⚠️ Location timed out — tap "Retry location" to try again. Geo-fence will be skipped.',
       };
-      setBanner('geo-warn', msgs[err.code] || '⚠️ Location error — geo-fence will be skipped');
+      // Show retry button for timeout and unavailable; for denial it needs a settings change
+      const showRetry = err.code !== 1;
+      setBanner('geo-warn', msgs[err.code] || '⚠️ Location error — geo-fence will be skipped', showRetry);
     },
     {
-      enableHighAccuracy: true,  // use GPS chip, not just WiFi/cell towers
-      timeout:            12000, // 12 seconds — teachers are usually on WiFi, GPS is slower indoors
-      maximumAge:         0,     // always fresh — never use cached position
+      enableHighAccuracy: true,
+      timeout:            12000,
+      maximumAge:         0,
     }
   );
 }
 
-function setBanner(type, msg) {
-  const b   = document.getElementById('geo-banner');
-  b.className   = 'geo-banner ' + type;
-  b.textContent = msg;
+/**
+ * Set the geo banner content.
+ * @param {string} type       - CSS class suffix: geo-loading | geo-ok | geo-warn | geo-error
+ * @param {string} msg        - Banner text
+ * @param {boolean} showRetry - Whether to append a retry button
+ */
+function setBanner(type, msg, showRetry = false) {
+  const b     = document.getElementById('geo-banner');
+  b.className = 'geo-banner ' + type;
+
+  if (showRetry) {
+    b.innerHTML = `
+      <span>${msg}</span>
+      <button
+        onclick="getLocation()"
+        style="margin-left:12px;padding:4px 12px;font-size:12px;font-weight:600;
+               background:#fff;border:1px solid currentColor;border-radius:6px;
+               cursor:pointer;color:inherit;font-family:inherit;">
+        Retry location
+      </button>`;
+  } else {
+    b.textContent = msg;
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -118,7 +146,21 @@ async function generateQR() {
 
   if (!courseId) { alert('Please select a course'); return; }
 
-  btn.textContent = 'Generating...';
+  // Guard: if GPS is still resolving, wait rather than silently proceeding without coords
+  if (locationPending) {
+    alert('📍 Still getting your location — please wait a moment, then try again.');
+    return;
+  }
+
+  // Warn if no location but don't block — geo-fence will just be skipped server-side
+  if (!userLat && !userLng) {
+    const proceed = confirm(
+      'Location is not available.\n\nGeo-fence will be disabled — students can scan from anywhere.\n\nProceed anyway?'
+    );
+    if (!proceed) return;
+  }
+
+  btn.textContent = 'Generating…';
   btn.disabled    = true;
 
   const res = await apiFetch('/api/sessions/generate', {
@@ -150,9 +192,12 @@ async function generateQR() {
 
   document.getElementById('qr-course-name').textContent = sessionCourseName;
   document.getElementById('qr-date').textContent        = sessionDate;
-  document.getElementById('qr-geo-info').textContent    = userLat
+
+  // Show clearly whether geo-fence is active for THIS session
+  document.getElementById('qr-geo-info').textContent = userLat
     ? `Active · ${fenceRadius}m radius`
-    : 'Not active (location unavailable)';
+    : 'Disabled (no location)';
+
   document.getElementById('qr-image').src = data.qr_image;
 
   document.getElementById('print-meta').textContent =
@@ -350,7 +395,7 @@ function backToHome() {
   currentSessionId = null;
   sessionClosed    = false;
   attendanceData   = [];
-  userLat          = null;  // ← reset coords so stale location isn't reused
+  userLat          = null;
   userLng          = null;
 
   document.getElementById('qr-image').src              = '';
@@ -363,7 +408,7 @@ function backToHome() {
   document.getElementById('qr-card').classList.add('hidden');
   document.getElementById('generate-card').classList.remove('hidden');
 
-  // Re-fetch location fresh for the next session
+  // Fresh location request for the next session
   getLocation();
 }
 
