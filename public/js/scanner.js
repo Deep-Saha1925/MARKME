@@ -11,9 +11,7 @@ let confirmedLng  = null;
 
 const deviceId = btoa(navigator.userAgent + screen.width + screen.height).slice(0, 64);
 
-// ─────────────────────────────────────────────
 // INIT
-// ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('student-name').textContent = user.name || '';
 
@@ -24,18 +22,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   checkAndRequestLocation();
 });
 
-// ─────────────────────────────────────────────
 // HTTPS CHECK
-// ─────────────────────────────────────────────
 function isHTTPSBlocked() {
   const isHTTP = location.protocol === 'http:';
   const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
   return isHTTP && !isLocal;
 }
 
-// ─────────────────────────────────────────────
 // LOCATION GATE SYSTEM
-// ─────────────────────────────────────────────
 function checkAndRequestLocation() {
   locationReady = false;
   confirmedLat = null;
@@ -123,9 +117,7 @@ function retryLocation() {
   checkAndRequestLocation();
 }
 
-// ─────────────────────────────────────────────
 // SCAN SUBMIT
-// ─────────────────────────────────────────────
 async function submitScan(decodedText, method) {
   if (!locationReady) {
     setStatus('Enable GPS first', 'error');
@@ -170,9 +162,7 @@ async function submitScan(decodedText, method) {
   }
 }
 
-// ─────────────────────────────────────────────
 // CAMERA
-// ─────────────────────────────────────────────
 function startScanner() {
   if (!locationReady) return checkAndRequestLocation();
 
@@ -196,9 +186,7 @@ function stopScanner() {
   scanning = false;
 }
 
-// ─────────────────────────────────────────────
 // QR IMAGE UPLOAD
-// ─────────────────────────────────────────────
 async function processUploadedQR(file) {
   if (!locationReady) return;
 
@@ -212,9 +200,7 @@ async function processUploadedQR(file) {
   }
 }
 
-// ─────────────────────────────────────────────
 // UI HELPERS
-// ─────────────────────────────────────────────
 function setStatus(msg, type) {
   const el = document.getElementById('scan-status');
   el.textContent = msg;
