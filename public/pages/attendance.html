@@ -68,47 +68,61 @@
     .upload-zone { border: 2px dashed #d3d1c7; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 12px; background: #fafaf8; }
     .upload-zone:hover { border-color: #534AB7; background: #EEEDF8; }
     .upload-zone.drag-over { border-color: #534AB7; background: #EEEDF8; }
-    .upload-zone.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
     .upload-zone input { display: none; }
     .upload-icon  { font-size: 28px; margin-bottom: 6px; }
     .upload-label { font-size: 14px; font-weight: 500; color: #3d3d3a; margin-bottom: 3px; }
     .upload-hint  { font-size: 12px; color: #9c9a92; }
     .upload-processing { font-size: 13px; color: #185FA5; margin-top: 6px; font-weight: 500; }
 
-    /* Location banner */
-    .loc-banner { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; text-align: center; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    /* Location banner (inside scan-view, shown after gate clears) */
+    .loc-banner { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; text-align: center; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .loc-banner.info    { background: #E0EDFB; color: #185FA5; }
     .loc-banner.success { background: #E1F5EE; color: #0F6E56; }
     .loc-banner.warning { background: #FAEEDA; color: #854F0B; }
     .loc-banner.error   { background: #FCEBEB; color: #791F1F; border: 1px solid #f09595; }
 
-    /* ── Location gate — shown when GPS not yet confirmed ── */
+    /* ── LOCATION GATE ──────────────────────────────────────
+       Sits in place of the scanner controls until GPS fires.
+    ─────────────────────────────────────────────────────── */
     .loc-gate {
       background: #fff;
       border: 1px solid #e0dfd8;
       border-radius: 16px;
-      padding: 28px 20px 24px;
+      padding: 32px 20px 28px;
       text-align: center;
       margin-bottom: 16px;
     }
     .loc-gate-icon { font-size: 40px; margin-bottom: 12px; }
-    .loc-gate h3   { font-size: 17px; font-weight: 600; margin-bottom: 6px; color: #1a1a18; }
-    .loc-gate p    { font-size: 13px; color: #73726c; line-height: 1.55; margin-bottom: 18px; }
+    .loc-gate h3   { font-size: 17px; font-weight: 600; margin-bottom: 8px; color: #1a1a18; }
+    .loc-gate p    { font-size: 13px; color: #73726c; line-height: 1.6; margin-bottom: 20px; }
 
+    /* Spinner inside gate */
     .loc-gate-spinner {
       display: inline-block;
-      width: 20px; height: 20px;
+      width: 18px; height: 18px;
       border: 3px solid #e0dfd8;
       border-top-color: #534AB7;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
-      margin-right: 8px;
+      margin-right: 6px;
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    .loc-gate-status {
+      font-size: 14px;
+      font-weight: 500;
+      color: #185FA5;
+      background: #E0EDFB;
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Retry button inside gate (for denied/error state) */
     .btn-gate-retry {
-      padding: 11px 24px;
+      padding: 11px 26px;
       font-size: 14px;
       font-weight: 600;
       background: #534AB7;
@@ -209,46 +223,57 @@
   <!-- SCAN -->
   <div class="page" id="page-scan">
 
-    <!-- HTTPS warning (shown when on plain HTTP) -->
+    <!-- HTTPS warning -->
     <div class="https-warning hidden" id="https-warning">
       <div class="warn-icon">⚠️</div>
       <h3>Location blocked — HTTPS required</h3>
       <p>Browsers block GPS on plain HTTP. Run <code>ngrok http 3000</code> and open the <code>https://</code> URL on your phone.</p>
     </div>
 
-    <!-- ── LOCATION GATE ──────────────────────────────────────
-         Shown until GPS is confirmed. Hides camera + upload.
-    ─────────────────────────────────────────────────────────── -->
+    <!-- ── LOCATION GATE ─────────────────────────────────────
+         Shown while GPS is pending or denied.
+         Hidden by setLocationState('granted') in scanner.js.
+    ──────────────────────────────────────────────────────── -->
     <div id="loc-gate" class="loc-gate">
-      <!-- State: requesting -->
+
+      <!-- Spinner state (default) -->
       <div id="gate-requesting">
         <div class="loc-gate-icon">📍</div>
         <h3>Location required</h3>
-        <p>GPS location is needed to verify you're physically present in class. Please allow location access when prompted.</p>
-        <div style="color:#185FA5;font-size:14px;font-weight:500;">
+        <p>GPS is needed to confirm you're physically present in class. Please allow location access when your browser asks.</p>
+        <div class="loc-gate-status">
           <span class="loc-gate-spinner"></span> Getting your location…
         </div>
       </div>
-      <!-- State: denied / error (hidden by default) -->
+
+      <!-- Error / denied state (hidden until GPS fails) -->
       <div id="gate-denied" class="hidden">
         <div class="loc-gate-icon">🚫</div>
         <h3 id="gate-denied-title">Location denied</h3>
-        <p id="gate-denied-msg">Location permission was denied. Please allow location access in your browser settings, then retry.</p>
+        <p id="gate-denied-msg">Location permission was denied. Please allow location in your browser settings, then retry.</p>
         <button class="btn-gate-retry" onclick="retryLocation()">
           📍 Retry location
         </button>
       </div>
+
     </div>
 
-    <!-- ── SCANNER CONTROLS (hidden until location confirmed) ── -->
+    <!-- ── SCANNER CONTROLS ──────────────────────────────────
+         Hidden until setLocationState('granted') is called.
+    ──────────────────────────────────────────────────────── -->
     <div id="scan-view" class="hidden">
+
       <div class="scanner-hero">
         <h2>Mark attendance</h2>
         <p>Scan QR with camera or upload a QR image</p>
       </div>
 
-      <!-- Location confirmed banner (always visible once unlocked) -->
-      <div id="loc-banner" class="loc-banner success" style="margin-bottom:12px;"></div>
+      <!-- Location confirmed banner -->
+      <div id="loc-banner" class="loc-banner hidden"></div>
+      <!-- Retry after low-accuracy warning (inside scan-view) -->
+      <button class="btn-outline hidden" id="retry-loc-btn" onclick="retryLocationBanner()" style="margin-bottom:12px">
+        📍 Retry location
+      </button>
 
       <!-- Camera scanner -->
       <div class="qr-wrapper"><div id="qr-reader"></div></div>
@@ -347,6 +372,7 @@
     <button class="tab-item"        onclick="switchTab('profile')" id="tab-profile"><span class="tab-icon">👤</span>Profile</button>
   </nav>
 
+  <script src="../../backend/routes/attendance.js"></script>
   <script src="../js/scanner.js"></script>
 </body>
 </html>
