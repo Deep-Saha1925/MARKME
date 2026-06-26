@@ -7,9 +7,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadDashboard();
 });
 
-// ─────────────────────────────────────────────
 // PAGE NAVIGATION
-// ─────────────────────────────────────────────
 function showPage(name, btn) {
   document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
   document.getElementById('page-' + name).classList.remove('hidden');
@@ -23,9 +21,7 @@ function showPage(name, btn) {
   if (name === 'import')    { updateImportHints(); }
 }
 
-// ─────────────────────────────────────────────
 // API HELPER
-// ─────────────────────────────────────────────
 async function api(url, options = {}) {
   const res = await fetch(url, {
     ...options,
@@ -35,9 +31,7 @@ async function api(url, options = {}) {
   return { ok: res.ok, data };
 }
 
-// ─────────────────────────────────────────────
 // DASHBOARD
-// ─────────────────────────────────────────────
 async function loadDashboard() {
   const [sRes, tRes, cRes] = await Promise.all([
     api('/api/admin/students'),
@@ -82,9 +76,8 @@ async function loadDashboard() {
     </div>`).join('') : '<div class="empty-state"><div class="empty-icon">👨‍🏫</div>No teachers yet</div>';
 }
 
-// ─────────────────────────────────────────────
+
 // STUDENTS — with pagination + sort + filter
-// ─────────────────────────────────────────────
 let allStudents  = [];
 let filteredStudents = [];
 let currentPage  = 1;
@@ -258,9 +251,7 @@ async function registerStudent() {
   loadStudents();
 }
 
-// ─────────────────────────────────────────────
 // TEACHERS
-// ─────────────────────────────────────────────
 async function loadTeachers() {
   const { ok, data } = await api('/api/admin/teachers');
   if (!ok) return;
