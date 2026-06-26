@@ -370,9 +370,7 @@ function scanAgain() {
   requestLocationForGate();
 }
 
-// ─────────────────────────────────────────────
 // TAB SWITCHING
-// ─────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
@@ -395,9 +393,7 @@ function switchTab(name) {
   if (name === 'history') renderHistory(allHistory);
 }
 
-// ─────────────────────────────────────────────
 // PROFILE
-// ─────────────────────────────────────────────
 async function loadProfile() {
   const res  = await apiFetch('/api/auth/me');
   const data = await res.json();
@@ -419,9 +415,7 @@ async function loadProfile() {
   `;
 }
 
-// ─────────────────────────────────────────────
 // COURSES + STATS
-// ─────────────────────────────────────────────
 async function loadCourses() {
   const res  = await apiFetch('/api/attendance/history');
   const data = await res.json();
@@ -453,9 +447,7 @@ async function loadCourses() {
   document.getElementById('profile-courses').innerHTML = html;
 }
 
-// ─────────────────────────────────────────────
 // HISTORY
-// ─────────────────────────────────────────────
 async function loadHistory() {
   const res  = await apiFetch('/api/attendance/detailed-history');
   const data = await res.json();
@@ -485,9 +477,7 @@ function filterHistory(type, btn) {
   renderHistory(type === 'all' ? allHistory : allHistory.filter(r => r.status === type));
 }
 
-// ─────────────────────────────────────────────
 // CHANGE PASSWORD
-// ─────────────────────────────────────────────
 async function changePassword() {
   const current = document.getElementById('pwd-current').value;
   const newPwd  = document.getElementById('pwd-new').value;
@@ -521,9 +511,7 @@ function showPwdMsg(type, text) {
   el.textContent = text;
 }
 
-// ─────────────────────────────────────────────
 // HELPERS
-// ─────────────────────────────────────────────
 function apiFetch(url, options = {}) {
   return fetch(url, {
     ...options,
