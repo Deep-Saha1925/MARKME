@@ -12,9 +12,7 @@ router.use(authMiddleware, (req, res, next) => {
   next();
 });
 
-// ─────────────────────────────────────────────
 // GET /api/admin/students
-// ─────────────────────────────────────────────
 router.get('/students', async (req, res) => {
   try {
     const rows = await sql`
@@ -28,9 +26,7 @@ router.get('/students', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // GET /api/admin/teachers
-// ─────────────────────────────────────────────
 router.get('/teachers', async (req, res) => {
   try {
     const rows = await sql`
@@ -44,9 +40,7 @@ router.get('/teachers', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // GET /api/admin/courses
-// ─────────────────────────────────────────────
 router.get('/courses', async (req, res) => {
   try {
     const rows = await sql`
@@ -62,9 +56,7 @@ router.get('/courses', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // POST /api/admin/courses
-// ─────────────────────────────────────────────
 router.post('/courses', async (req, res) => {
   const { name, code, teacher_id } = req.body;
   if (!name || !code) {
@@ -88,9 +80,7 @@ router.post('/courses', async (req, res) => {
 
 module.exports = router;
 
-// ─────────────────────────────────────────────
 // DELETE /api/admin/students/:id
-// ─────────────────────────────────────────────
 router.delete('/students/:id', async (req, res) => {
   try {
     await sql`DELETE FROM students WHERE id = ${req.params.id}`;
@@ -100,9 +90,7 @@ router.delete('/students/:id', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // DELETE /api/admin/teachers/:id
-// ─────────────────────────────────────────────
 router.delete('/teachers/:id', async (req, res) => {
   try {
     await sql`DELETE FROM users WHERE id = ${req.params.id} AND role = 'teacher'`;
@@ -112,9 +100,7 @@ router.delete('/teachers/:id', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // DELETE /api/admin/courses/:id
-// ─────────────────────────────────────────────
 router.delete('/courses/:id', async (req, res) => {
   try {
     await sql`DELETE FROM courses WHERE id = ${req.params.id}`;
