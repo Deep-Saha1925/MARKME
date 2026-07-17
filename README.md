@@ -28,6 +28,43 @@ A QR-based attendance system for colleges. Teachers generate a QR code at the st
 
 ---
 
+## 📸 Screenshots
+
+### Login Page
+<p align="center">
+  <img src="assets/login.png" width="900">
+</p>
+
+### Admin Dashboard
+<p align="center">
+  <img src="assets/admin-dash.png" width="900">
+</p>
+
+### Bulk Import
+<p align="center">
+  <img src="assets/bulk-import.png" width="900">
+</p>
+
+### Teacher Dashboard
+<p align="center">
+  <img src="assets/t-dash.png" width="900">
+</p>
+
+### QR Session & Live Attendance
+<p align="center">
+  <img src="assets/attendance.png" width="900">
+</p>
+
+### Student Dashboard
+<p align="center">
+  <img src="assets/student-dash.png" width="900">
+</p>
+
+### Student QR Scanner
+<p align="center">
+  <img src="assets/student-scan.png" width="900">
+</p>
+
 ## Project structure
 
 ```
