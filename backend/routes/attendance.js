@@ -130,6 +130,13 @@ router.post('/scan', authMiddleware, async (req, res) => {
 
   } catch (err) {
       console.error('[scan]', err);
+
+      if(err.code === '23505'){
+        return res.status(400).json({
+          error: 'You have already marked attendance for this session.'
+        });
+      }
+
   }
 });
 
