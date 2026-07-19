@@ -129,8 +129,7 @@ router.post('/scan', authMiddleware, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('[scan]', err);
-    res.status(500).json({ error: 'Server error' });
+      console.error('[scan]', err);
   }
 });
 
