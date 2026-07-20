@@ -197,7 +197,6 @@ router.post('/register/students/bulk', authMiddleware, async (req, res) => {
   });
 });
 
-// ─────────────────────────────────────────────
 // POST /api/auth/student/set-password
 // Student sets their own password on first login
 // ─────────────────────────────────────────────
