@@ -166,10 +166,8 @@ router.get('/history', authMiddleware, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // GET /api/attendance/detailed-history
 // Individual scan records (for history tab)
-// ─────────────────────────────────────────────
 router.get('/detailed-history', authMiddleware, async (req, res) => {
   try {
     const records = await sql`
