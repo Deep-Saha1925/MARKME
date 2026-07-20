@@ -119,10 +119,8 @@ router.post('/register/teacher', authMiddleware, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // POST /api/auth/register/student
 // Admin only — register a single student
-// ─────────────────────────────────────────────
 router.post('/register/student', authMiddleware, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Only admins can register students' });
