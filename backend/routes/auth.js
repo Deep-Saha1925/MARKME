@@ -199,7 +199,6 @@ router.post('/register/students/bulk', authMiddleware, async (req, res) => {
 
 // POST /api/auth/student/set-password
 // Student sets their own password on first login
-// ─────────────────────────────────────────────
 router.post('/student/set-password', authMiddleware, async (req, res) => {
   if (req.user.role !== 'student') {
     return res.status(403).json({ error: 'Only students can use this endpoint' });
@@ -219,9 +218,7 @@ router.post('/student/set-password', authMiddleware, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // GET /api/auth/me  — get current user info
-// ─────────────────────────────────────────────
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     let user = null;
