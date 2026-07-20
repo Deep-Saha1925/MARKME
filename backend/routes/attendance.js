@@ -141,10 +141,8 @@ router.post('/scan', authMiddleware, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // GET /api/attendance/history
 // Per-course summary (for home + profile tabs)
-// ─────────────────────────────────────────────
 router.get('/history', authMiddleware, async (req, res) => {
   try {
     const records = await sql`
