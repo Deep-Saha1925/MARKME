@@ -85,10 +85,8 @@ router.post('/register/admin', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // POST /api/auth/register/teacher
 // Admin only — creates a teacher account
-// ─────────────────────────────────────────────
 router.post('/register/teacher', authMiddleware, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Only admins can create teacher accounts' });
