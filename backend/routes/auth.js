@@ -242,10 +242,8 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // POST /api/auth/verify-student
 // Step 1 of signup — checks roll no + email match
-// ─────────────────────────────────────────────
 router.post('/verify-student', async (req, res) => {
   const { roll_no, email } = req.body;
 
