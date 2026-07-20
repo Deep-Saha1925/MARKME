@@ -294,7 +294,6 @@ router.post('/verify-student', async (req, res) => {
 // ─────────────────────────────────────────────
 // POST /api/auth/student/activate
 // Step 2 of signup — sets the student's password
-// ─────────────────────────────────────────────
 router.post('/student/activate', async (req, res) => {
   const { roll_no, email, password } = req.body;
 
