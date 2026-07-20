@@ -155,10 +155,8 @@ router.post('/register/student', authMiddleware, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // POST /api/auth/register/students/bulk
 // Admin only — register multiple students from JSON array
-// ─────────────────────────────────────────────
 router.post('/register/students/bulk', authMiddleware, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Only admins can bulk register students' });
