@@ -7,9 +7,7 @@ require('dotenv').config();
 
 const router = express.Router();
 
-// ─────────────────────────────────────────────
 // Helper — generate JWT
-// ─────────────────────────────────────────────
 function generateToken(user, role) {
   return jwt.sign(
     { id: user.id, email: user.email, role },
