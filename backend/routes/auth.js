@@ -16,9 +16,7 @@ function generateToken(user, role) {
   );
 }
 
-// ─────────────────────────────────────────────
 // POST /api/auth/login  (all roles)
-// ─────────────────────────────────────────────
 router.post('/login', async (req, res) => {
   const { email, password, role } = req.body;
 
