@@ -53,10 +53,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────
 // POST /api/auth/register/admin
 // Creates the very first admin (run once)
-// ─────────────────────────────────────────────
 router.post('/register/admin', async (req, res) => {
   const { name, email, password } = req.body;
 
