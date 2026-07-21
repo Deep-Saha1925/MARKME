@@ -1,40 +1,14 @@
+// public/js/scanner.js
+
 const token = localStorage.getItem('markme_token');
 const user  = JSON.parse(localStorage.getItem('markme_user') || '{}');
 if (!token) window.location.href = '/pages/login.html';
 
-let scanner    = null;
-let scanning   = false;
-let allHistory = [];
-const deviceId = btoa(navigator.userAgent + screen.width + screen.height).slice(0, 64);
-
-// ─────────────────────────────────────────────
-// LOCATION GATE STATE
-// locationState: 'pending' | 'granted' | 'denied'
-// ─────────────────────────────────────────────
-let locationState = 'pending';
-
-function setLocationState(state) {
-  locationState = state;
-  const gate    = document.getElementById('loc-gate');
-  const scanView = document.getElementById('scan-view');
-
-  if (state === 'granted') {
-    gate.classList.add('hidden');
-    scanView.classList.remove('hidden');
-  } else {
-    gate.classList.remove('hidden');
-    scanView.classList.add('hidden');
-  }
-
-  // Update which inner state the gate shows
-  if (state === 'pending') {
-    document.getElementById('gate-requesting').classList.remove('hidden');
-    document.getElementById('gate-denied').classList.add('hidden');
-  } else if (state === 'denied') {
-    document.getElementById('gate-requesting').classList.add('hidden');
-    document.getElementById('gate-denied').classList.remove('hidden');
-  }
-}
+let scanner      = null;
+let scanning     = false;
+let allHistory   = [];
+let activeTimers = {}; // stores setInterval IDs per session card
+const deviceId   = btoa(navigator.userAgent + screen.width + screen.height).slice(0, 64);
 
 // ─────────────────────────────────────────────
 // INIT
@@ -42,11 +16,129 @@ function setLocationState(state) {
 window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('student-name').textContent = user.name || '';
   checkHTTPS();
+  warmUpGPS();
   await loadProfile();
   await loadCourses();
   await loadHistory();
-  // Don't warm up GPS here — gate handles it when Scan tab is opened
+  await loadActiveSessions();
+
+  // Refresh active sessions every 30 seconds
+  setInterval(loadActiveSessions, 30000);
 });
+
+// ─────────────────────────────────────────────
+// ACTIVE SESSIONS
+// ─────────────────────────────────────────────
+async function loadActiveSessions() {
+  const res  = await apiFetch('/api/sessions/active');
+  const data = await res.json();
+  const list = document.getElementById('active-classes-list');
+  const section = document.getElementById('live-section');
+  const notif   = document.getElementById('scan-notif');
+
+  // Clear old timers
+  Object.values(activeTimers).forEach(clearInterval);
+  activeTimers = {};
+
+  if (!res.ok || !data.length) {
+    section.style.display = 'none';
+    notif.classList.remove('show');
+    return;
+  }
+
+  section.style.display = 'block';
+
+  // Show red dot on Scan tab if any class not yet marked
+  const hasUnscan = data.some(s => !s.already_scanned);
+  notif.classList.toggle('show', hasUnscan);
+
+  list.innerHTML = data.map(s => buildActiveCard(s)).join('');
+
+  // Start individual countdown timers for each card
+  data.forEach(s => startCardTimer(s));
+}
+
+function buildActiveCard(s) {
+  const expiresAt  = new Date(s.expires_at);
+  const remaining  = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+  const total      = Math.floor((expiresAt - new Date(s.created_at)) / 1000);
+  const pct        = Math.min(100, (remaining / total) * 100);
+  const timerClass = remaining <= 60 ? 'urgent' : 'running';
+  const barColor   = remaining <= 60 ? '#D97706' : '#1D9E75';
+  const timeStr    = formatSeconds(remaining);
+
+  return `
+    <div class="active-class-card ${s.already_scanned ? 'marked' : ''}" id="card-${s.id}">
+      <div class="ac-top">
+        <div class="ac-left">
+          <div class="ac-name">${s.course_name}</div>
+          <div class="ac-meta">${s.course_code} · ${s.teacher_name}</div>
+        </div>
+        ${s.already_scanned
+          ? `<div class="badge-marked">✓ Marked</div>`
+          : `<button class="btn-scan-now" onclick="goScan()">Scan now</button>`
+        }
+      </div>
+      <div class="ac-timer ${timerClass}" id="timer-${s.id}">
+        ⏱ ${timeStr} left
+      </div>
+      <div class="ac-timer-bar-bg">
+        <div class="ac-timer-bar" id="bar-${s.id}"
+          style="width:${pct}%;background:${barColor}">
+        </div>
+      </div>
+    </div>`;
+}
+
+function startCardTimer(s) {
+  const expiresAt = new Date(s.expires_at);
+  const total     = Math.floor((expiresAt - new Date(s.created_at)) / 1000);
+
+  activeTimers[s.id] = setInterval(() => {
+    const remaining  = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+    const pct        = Math.min(100, (remaining / total) * 100);
+    const isUrgent   = remaining <= 60;
+    const barColor   = isUrgent ? '#D97706' : '#1D9E75';
+
+    const timerEl = document.getElementById(`timer-${s.id}`);
+    const barEl   = document.getElementById(`bar-${s.id}`);
+
+    if (!timerEl || !barEl) {
+      clearInterval(activeTimers[s.id]);
+      return;
+    }
+
+    if (remaining <= 0) {
+      clearInterval(activeTimers[s.id]);
+      timerEl.textContent = 'Expired';
+      timerEl.className   = 'ac-timer done';
+      barEl.style.width   = '0%';
+      // Fade out the card
+      const card = document.getElementById(`card-${s.id}`);
+      if (card) { card.style.transition = 'opacity 1s'; card.style.opacity = '0.4'; }
+      return;
+    }
+
+    timerEl.textContent = `⏱ ${formatSeconds(remaining)} left`;
+    timerEl.className   = `ac-timer ${isUrgent ? 'urgent' : 'running'}`;
+    barEl.style.width   = `${pct}%`;
+    barEl.style.background = barColor;
+  }, 1000);
+}
+
+// Tapping "Scan now" goes to scan tab
+function goScan() {
+  switchTab('scan');
+}
+
+function formatSeconds(secs) {
+  if (secs <= 0) return 'Expired';
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return m > 0
+    ? `${m}m ${String(s).padStart(2,'0')}s`
+    : `${s}s`;
+}
 
 // ─────────────────────────────────────────────
 // HTTPS CHECK
@@ -56,94 +148,24 @@ function checkHTTPS() {
   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
   if (isHTTP && !isLocalhost) {
     document.getElementById('https-warning').classList.remove('hidden');
+    const startBtn = document.getElementById('start-btn');
+    startBtn.disabled    = true;
+    startBtn.textContent = 'HTTPS required to scan';
   }
 }
 
 // ─────────────────────────────────────────────
-// LOCATION GATE — request GPS and gate the UI
-// Called when Scan tab opens and after scanAgain()
+// GPS WARM-UP
 // ─────────────────────────────────────────────
-function requestLocationForGate() {
-  // If on plain HTTP (non-localhost), GPS will be silently blocked —
-  // show the denied state immediately with an HTTPS explanation.
-  const isHTTP      = window.location.protocol === 'http:';
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  if (isHTTP && !isLocalhost) {
-    document.getElementById('gate-denied-title').textContent = 'HTTPS required for GPS';
-    document.getElementById('gate-denied-msg').textContent   =
-      'Browsers block location on plain HTTP. Open the https:// URL (e.g. via ngrok) to use GPS.';
-    setLocationState('denied');
-    return;
-  }
-
-  if (!navigator.geolocation) {
-    document.getElementById('gate-denied-title').textContent = 'Location not supported';
-    document.getElementById('gate-denied-msg').textContent   =
-      'Your browser or device does not support GPS. Location is required to mark attendance.';
-    setLocationState('denied');
-    return;
-  }
-
-  // Show spinner
-  setLocationState('pending');
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      // Store coords for submitScan to use
-      window._lastLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-
-      const acc = Math.round(pos.coords.accuracy);
-
-      // Show the confirmed banner inside scan-view
-      showLocBanner(
-        acc <= 200 ? 'success' : 'warning',
-        acc <= 50
-          ? `✓ Location confirmed (±${acc}m)`
-          : acc <= 200
-            ? `✓ Location confirmed (±${acc}m accuracy)`
-            : `⚠️ Low GPS accuracy (±${acc}m) — move near a window`
-      );
-
-      // Unlock the scanner controls
-      setLocationState('granted');
-    },
-    err => {
-      window._lastLocation = null;
-
-      const messages = {
-        1: {
-          title: 'Location permission denied',
-          msg:   'You denied location access. Please allow location in your browser settings, then tap "Retry location".'
-        },
-        2: {
-          title: 'Location unavailable',
-          msg:   'Could not get your GPS position. Make sure location services are enabled, then retry.'
-        },
-        3: {
-          title: 'Location timed out',
-          msg:   'GPS took too long. Move to an open area or near a window, then tap "Retry location".'
-        },
-      };
-      const { title, msg } = messages[err.code] || {
-        title: 'Location error',
-        msg:   'An unknown location error occurred. Please retry.'
-      };
-      document.getElementById('gate-denied-title').textContent = title;
-      document.getElementById('gate-denied-msg').textContent   = msg;
-      setLocationState('denied');
-    },
-    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
-  );
-}
-
-// Called by the "Retry location" button in the gate
-function retryLocation() {
-  window._lastLocation = null;
-  requestLocationForGate();
+function warmUpGPS() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(() => {}, () => {}, {
+    enableHighAccuracy: true, timeout: 10000, maximumAge: 0
+  });
 }
 
 // ─────────────────────────────────────────────
-// LOCATION BANNER (inside scan-view, post-gate)
+// LOCATION BANNER
 // ─────────────────────────────────────────────
 function showLocBanner(type, msg) {
   const el = document.getElementById('loc-banner');
@@ -156,20 +178,19 @@ function hideLocBanner() {
 }
 
 // ─────────────────────────────────────────────
-// GET FRESH GPS — called at scan/upload time
-// (keeps existing retry-after-scan behaviour)
+// GET FRESH GPS
 // ─────────────────────────────────────────────
 function getCurrentLocation() {
   return new Promise(resolve => {
     if (!navigator.geolocation) {
-      showLocBanner('warning', 'Location not supported — geo-fence skipped');
+      showLocBanner('warning', '⚠️ Location not supported — geo-fence skipped');
       resolve({ lat: null, lng: null });
       return;
     }
     const isHTTP      = window.location.protocol === 'http:';
-    const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    const isLocalhost = ['localhost','127.0.0.1'].includes(window.location.hostname);
     if (isHTTP && !isLocalhost) {
-      showLocBanner('error', 'GPS blocked on HTTP — open site over HTTPS');
+      showLocBanner('error', '❌ GPS blocked on HTTP — open site over HTTPS');
       resolve({ lat: null, lng: null });
       return;
     }
@@ -180,19 +201,19 @@ function getCurrentLocation() {
         showLocBanner(
           acc <= 50 ? 'success' : 'warning',
           acc <= 50
-            ? '✓ Location confirmed (±' + acc + 'm)'
-            : '⚠️ Low GPS accuracy (±' + acc + 'm)'
+            ? `✓ Location confirmed (±${acc}m)`
+            : `⚠️ Low GPS accuracy (±${acc}m)`
         );
         if (acc > 50) document.getElementById('retry-loc-btn').classList.remove('hidden');
         resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       },
       err => {
         const msgs = {
-          1: 'Location denied — allow location in browser settings',
-          2: 'Location unavailable — check GPS is on',
-          3: 'Location timed out — move to open area and retry',
+          1: '❌ Location denied — allow location in browser settings',
+          2: '❌ Location unavailable — check GPS is on',
+          3: '❌ Location timed out — move to open area and retry',
         };
-        showLocBanner('error', msgs[err.code] || 'Location error');
+        showLocBanner('error', msgs[err.code] || '❌ Location error');
         document.getElementById('retry-loc-btn').classList.remove('hidden');
         resolve({ lat: null, lng: null });
       },
@@ -201,24 +222,21 @@ function getCurrentLocation() {
   });
 }
 
-async function retryLocationBanner() {
+async function retryLocation() {
   document.getElementById('retry-loc-btn').classList.add('hidden');
-  const loc = await getCurrentLocation();
-  window._lastLocation = loc;
+  window._lastLocation = await getCurrentLocation();
 }
 
 // ─────────────────────────────────────────────
 // SUBMIT SCAN — shared by camera + upload
 // ─────────────────────────────────────────────
 async function submitScan(decodedText, method) {
-  // Use gate-captured coords if available, otherwise get fresh
-  let loc = window._lastLocation || null;
+  let location = window._lastLocation || null;
   window._lastLocation = null;
-  if (!loc) loc = await getCurrentLocation();
+  if (!location) location = await getCurrentLocation();
 
-  // Block if still no location — backend requires it
-  if (!loc.lat || !loc.lng) {
-    setStatus('Location required — enable GPS and tap Retry', 'error');
+  if (!location.lat || !location.lng) {
+    setStatus('❌ Location required — enable GPS and tap Retry', 'error');
     document.getElementById('retry-loc-btn').classList.remove('hidden');
     scanning = false;
     document.getElementById('start-btn').classList.remove('hidden');
@@ -233,8 +251,8 @@ async function submitScan(decodedText, method) {
       body: JSON.stringify({
         token:     decodedText,
         device_id: deviceId,
-        lat:       loc.lat,
-        lng:       loc.lng,
+        lat:       location.lat,
+        lng:       location.lng,
       })
     });
     const data = await res.json();
@@ -246,7 +264,6 @@ async function submitScan(decodedText, method) {
       return;
     }
 
-    // Show success
     document.getElementById('scan-view').classList.add('hidden');
     document.getElementById('success-view').classList.remove('hidden');
     document.getElementById('success-course').textContent = data.course_name;
@@ -254,8 +271,10 @@ async function submitScan(decodedText, method) {
     document.getElementById('success-method').textContent =
       method === 'upload' ? '📁 Marked via uploaded QR image' : '📷 Marked via camera scan';
 
+    // Refresh data
     loadCourses();
     loadHistory();
+    loadActiveSessions(); // refresh active classes to show ✓ Marked
 
   } catch {
     setStatus('Could not connect to server', 'error');
@@ -329,7 +348,6 @@ function handleUploadFile(e) {
 async function processUploadedQR(file) {
   if (scanning) return;
   scanning = true;
-
   hideLocBanner();
   document.getElementById('retry-loc-btn').classList.add('hidden');
   document.getElementById('upload-processing').classList.remove('hidden');
@@ -339,18 +357,15 @@ async function processUploadedQR(file) {
     const html5QrCode = new Html5Qrcode('qr-reader');
     const decodedText = await html5QrCode.scanFile(file, false);
     document.getElementById('upload-processing').classList.add('hidden');
-
     if (!decodedText) {
-      setStatus('No QR code found in this image. Try a clearer photo.', 'error');
+      setStatus('❌ No QR code found in this image. Try a clearer photo.', 'error');
       scanning = false;
       return;
     }
-
     await submitScan(decodedText, 'upload');
-
-  } catch (err) {
+  } catch {
     document.getElementById('upload-processing').classList.add('hidden');
-    setStatus('Could not read QR from image. Make sure the QR is clear and fully visible.', 'error');
+    setStatus('❌ Could not read QR from image. Make sure the QR is clear and fully visible.', 'error');
     scanning = false;
   }
 }
@@ -362,38 +377,32 @@ function scanAgain() {
   scanning = false;
   window._lastLocation = null;
   document.getElementById('success-view').classList.add('hidden');
+  document.getElementById('scan-view').classList.remove('hidden');
   hideLocBanner();
   document.getElementById('retry-loc-btn').classList.add('hidden');
   document.getElementById('upload-processing').classList.add('hidden');
   setStatus('', '');
-  // Re-run the gate so location is re-verified before next scan
-  requestLocationForGate();
 }
 
+// ─────────────────────────────────────────────
 // TAB SWITCHING
+// ─────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
-
   if (name !== 'scan' && scanner) stopScanner();
-
+  if (name === 'history') renderHistory(allHistory);
   if (name === 'scan') {
-    // Always re-verify location when entering Scan tab
-    window._lastLocation = null;
-    locationState = 'pending';
-    document.getElementById('success-view').classList.add('hidden');
     hideLocBanner();
     document.getElementById('retry-loc-btn').classList.add('hidden');
-    setStatus('', '');
-    requestLocationForGate();
   }
-
-  if (name === 'history') renderHistory(allHistory);
 }
 
+// ─────────────────────────────────────────────
 // PROFILE
+// ─────────────────────────────────────────────
 async function loadProfile() {
   const res  = await apiFetch('/api/auth/me');
   const data = await res.json();
@@ -415,7 +424,9 @@ async function loadProfile() {
   `;
 }
 
+// ─────────────────────────────────────────────
 // COURSES + STATS
+// ─────────────────────────────────────────────
 async function loadCourses() {
   const res  = await apiFetch('/api/attendance/history');
   const data = await res.json();
@@ -447,7 +458,9 @@ async function loadCourses() {
   document.getElementById('profile-courses').innerHTML = html;
 }
 
+// ─────────────────────────────────────────────
 // HISTORY
+// ─────────────────────────────────────────────
 async function loadHistory() {
   const res  = await apiFetch('/api/attendance/detailed-history');
   const data = await res.json();
@@ -477,7 +490,9 @@ function filterHistory(type, btn) {
   renderHistory(type === 'all' ? allHistory : allHistory.filter(r => r.status === type));
 }
 
+// ─────────────────────────────────────────────
 // CHANGE PASSWORD
+// ─────────────────────────────────────────────
 async function changePassword() {
   const current = document.getElementById('pwd-current').value;
   const newPwd  = document.getElementById('pwd-new').value;
@@ -501,7 +516,7 @@ async function changePassword() {
     document.getElementById('pwd-new').value     = '';
     document.getElementById('pwd-confirm').value = '';
   } catch { showPwdMsg('error', 'Could not connect to server'); }
-  finally { btn.textContent = 'Update password'; btn.disabled = false; }
+  finally   { btn.textContent = 'Update password'; btn.disabled = false; }
 }
 function showPwdMsg(type, text) {
   const el = document.getElementById('pwd-msg');
@@ -511,7 +526,9 @@ function showPwdMsg(type, text) {
   el.textContent = text;
 }
 
+// ─────────────────────────────────────────────
 // HELPERS
+// ─────────────────────────────────────────────
 function apiFetch(url, options = {}) {
   return fetch(url, {
     ...options,
