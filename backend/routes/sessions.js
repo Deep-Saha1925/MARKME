@@ -162,8 +162,6 @@ router.get('/:id/share', async (req, res) => {
 });
 
 
-// Add this to backend/routes/sessions.js before module.exports
-
 // GET /api/sessions/active
 // Returns all currently live sessions (not expired, is_active = true)
 router.get('/active', authMiddleware, async (req, res) => {
