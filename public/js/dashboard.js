@@ -18,9 +18,15 @@ let locationPending    = false;   // true while GPS request is in-flight
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   loadCourses();
-  getLocation();
+  loadHistory();
+
+  // If a session is still live from before (e.g. teacher got logged out
+  // or refreshed mid-class), restore it first. Only request GPS for a
+  // brand-new session if nothing was recovered.
+  const resumed = await checkActiveSession();
+  if (!resumed) getLocation();
 });
 
 // ─────────────────────────────────────────────
@@ -37,6 +43,95 @@ async function loadCourses() {
   sel.innerHTML = data.map(c =>
     `<option value="${c.id}">${c.name} (${c.code})</option>`
   ).join('');
+}
+
+// ─────────────────────────────────────────────
+// RECOVER AN ACTIVE SESSION (e.g. after accidental logout)
+// ─────────────────────────────────────────────
+async function checkActiveSession() {
+  try {
+    const res  = await apiFetch('/api/sessions/my-active');
+    const data = await res.json();
+    if (!res.ok || !data.active) return false;
+
+    currentSessionId  = data.session_id;
+    sessionClosed     = false;
+    attendanceData    = [];
+    sessionCourseName = `${data.course_name} (${data.course_code})`;
+    sessionDate       = new Date(data.expires_at).toLocaleDateString('en-IN', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+
+    document.getElementById('qr-course-name').textContent = sessionCourseName;
+    document.getElementById('qr-date').textContent        = sessionDate;
+    document.getElementById('qr-geo-info').textContent = data.geo_enabled
+      ? `Active · ${data.fence_radius_m}m radius`
+      : 'Disabled (no location)';
+    document.getElementById('qr-image').src = data.qr_image;
+
+    document.getElementById('print-meta').textContent =
+      `${sessionCourseName} · ${sessionDate} · Printed by ${user.name || 'Teacher'}`;
+
+    document.getElementById('generate-card').classList.add('hidden');
+    document.getElementById('qr-card').classList.remove('hidden');
+    document.getElementById('closed-banner').classList.add('hidden');
+    document.getElementById('close-btn').classList.remove('hidden');
+
+    // Let the teacher know this was picked back up, then fade the notice
+    const banner = document.getElementById('resume-banner');
+    banner.classList.remove('hidden');
+    setTimeout(() => banner.classList.add('hidden'), 6000);
+
+    startTimer(data.seconds_left);
+    startPolling();
+    return true;
+  } catch (err) {
+    console.error('[checkActiveSession]', err);
+    return false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// RECENT CLASSES (history)
+// ─────────────────────────────────────────────
+async function loadHistory() {
+  const list = document.getElementById('history-list');
+  try {
+    const res  = await apiFetch('/api/sessions/history');
+    const data = await res.json();
+
+    if (!res.ok) {
+      list.innerHTML = '<p style="color:#73726c;font-size:14px">Could not load class history.</p>';
+      return;
+    }
+    if (!data.length) {
+      list.innerHTML = '<p style="color:#73726c;font-size:14px">No classes yet — generate your first QR above.</p>';
+      return;
+    }
+
+    list.innerHTML = data.map(s => `
+      <div class="history-row">
+        <div>
+          <div class="history-course">${s.course_name} (${s.course_code})</div>
+          <div class="history-meta">${formatHistoryDate(s.created_at)}</div>
+        </div>
+        <div class="history-right">
+          <span class="badge-count">${s.present_count} present</span>
+          <span class="status-badge status-${s.status}">${s.status}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('[loadHistory]', err);
+    list.innerHTML = '<p style="color:#73726c;font-size:14px">Could not load class history.</p>';
+  }
+}
+
+function formatHistoryDate(iso) {
+  return new Date(iso).toLocaleString('en-IN', {
+    weekday: 'short', day: 'numeric', month: 'short',
+    hour: '2-digit', minute: '2-digit'
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -210,6 +305,7 @@ async function generateQR() {
 
   startTimer(data.expiry_mins * 60);
   startPolling();
+  loadHistory();
 }
 
 // ─────────────────────────────────────────────
@@ -381,6 +477,7 @@ async function closeSession() {
   document.getElementById('timer-box').className    = 'timer-box timer-expired';
   document.getElementById('closed-banner').classList.remove('hidden');
   document.getElementById('close-btn').classList.add('hidden');
+  loadHistory();
 }
 
 // ─────────────────────────────────────────────
