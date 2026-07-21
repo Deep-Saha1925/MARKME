@@ -161,4 +161,41 @@ router.get('/:id/share', async (req, res) => {
   }
 });
 
+
+// Add this to backend/routes/sessions.js before module.exports
+
+// GET /api/sessions/active
+// Returns all currently live sessions (not expired, is_active = true)
+router.get('/active', authMiddleware, async (req, res) => {
+  try {
+    const now = new Date();
+    const sessions = await sql`
+      SELECT
+        s.id,
+        s.expires_at,
+        s.created_at,
+        s.fence_radius_m,
+        c.name  AS course_name,
+        c.code  AS course_code,
+        u.name  AS teacher_name,
+        EXISTS (
+          SELECT 1 FROM attendance a
+          WHERE a.session_id = s.id
+          AND   a.student_id = ${req.user.id}
+        ) AS already_scanned
+      FROM sessions s
+      JOIN courses c ON c.id = s.course_id
+      JOIN users   u ON u.id = s.teacher_id
+      WHERE s.is_active  = true
+      AND   s.expires_at > ${now}
+      ORDER BY s.created_at DESC
+    `;
+    res.json(sessions);
+  } catch (err) {
+    console.error('[active-sessions]', err);
+    res.status(500).json({ error: 'Could not fetch active sessions' });
+  }
+});
+
+
 module.exports = router;
