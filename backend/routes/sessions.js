@@ -161,6 +161,98 @@ router.get('/:id/share', async (req, res) => {
   }
 });
 
+// GET /api/sessions/my-active
+// Teacher recovery — if the teacher accidentally logs out (or the tab
+// closes/refreshes) while a QR session is still live, logging back in
+// will find that same session here so they can pick up right where
+// they left off, instead of having to generate a fresh QR.
+router.get('/my-active', authMiddleware, async (req, res) => {
+  try {
+    const now = new Date();
+    const sessions = await sql`
+      SELECT
+        s.id, s.qr_token, s.expires_at, s.created_at,
+        s.classroom_lat, s.classroom_lng, s.fence_radius_m,
+        c.id AS course_id, c.name AS course_name, c.code AS course_code
+      FROM sessions s
+      JOIN courses c ON c.id = s.course_id
+      WHERE s.teacher_id = ${req.user.id}
+        AND s.is_active  = true
+        AND s.expires_at > ${now}
+      ORDER BY s.created_at DESC
+      LIMIT 1
+    `;
+
+    if (!sessions.length) {
+      return res.json({ active: false });
+    }
+
+    const session = sessions[0];
+
+    // Regenerate the QR image from the stored token — we never persisted
+    // the image itself, only the token, so it's rebuilt on demand.
+    const qrImage = await qrcode.toDataURL(session.qr_token, {
+      width: 300, margin: 2,
+      color: { dark: '#1a1a18', light: '#ffffff' }
+    });
+
+    const secondsLeft = Math.max(
+      0,
+      Math.round((new Date(session.expires_at) - now) / 1000)
+    );
+
+    res.json({
+      active:         true,
+      session_id:     session.id,
+      course_id:      session.course_id,
+      course_name:    session.course_name,
+      course_code:    session.course_code,
+      qr_image:       qrImage,
+      expires_at:     session.expires_at,
+      seconds_left:   secondsLeft,
+      geo_enabled:    !!(session.classroom_lat && session.classroom_lng),
+      fence_radius_m: session.fence_radius_m,
+    });
+  } catch (err) {
+    console.error('[my-active]', err);
+    res.status(500).json({ error: 'Could not check for an active session' });
+  }
+});
+
+// GET /api/sessions/history
+// Teacher's recent classes — closed/expired/active sessions with a
+// live present-count, so a teacher can look back at earlier classes.
+router.get('/history', authMiddleware, async (req, res) => {
+  try {
+    const now = new Date();
+    const sessions = await sql`
+      SELECT
+        s.id, s.created_at, s.expires_at, s.is_active,
+        c.name AS course_name, c.code AS course_code,
+        COUNT(a.id) AS present_count
+      FROM sessions s
+      JOIN courses c ON c.id = s.course_id
+      LEFT JOIN attendance a ON a.session_id = s.id
+      WHERE s.teacher_id = ${req.user.id}
+      GROUP BY s.id, c.name, c.code
+      ORDER BY s.created_at DESC
+      LIMIT 20
+    `;
+
+    const withStatus = sessions.map(s => ({
+      ...s,
+      status: (s.is_active && new Date(s.expires_at) > now)
+        ? 'active'
+        : (s.is_active ? 'expired' : 'closed'),
+    }));
+
+    res.json(withStatus);
+  } catch (err) {
+    console.error('[sessions-history]', err);
+    res.status(500).json({ error: 'Could not fetch class history' });
+  }
+});
+
 // GET /api/sessions/active
 // Returns all currently live sessions (not expired, is_active = true)
 router.get('/active', authMiddleware, async (req, res) => {
