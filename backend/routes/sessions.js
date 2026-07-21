@@ -161,7 +161,6 @@ router.get('/:id/share', async (req, res) => {
   }
 });
 
-
 // GET /api/sessions/active
 // Returns all currently live sessions (not expired, is_active = true)
 router.get('/active', authMiddleware, async (req, res) => {
@@ -194,6 +193,5 @@ router.get('/active', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Could not fetch active sessions' });
   }
 });
-
 
 module.exports = router;
