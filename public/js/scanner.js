@@ -1,5 +1,3 @@
-// public/js/scanner.js
-
 const token = localStorage.getItem('markme_token');
 const user  = JSON.parse(localStorage.getItem('markme_user') || '{}');
 if (!token) window.location.href = '/pages/login.html';
