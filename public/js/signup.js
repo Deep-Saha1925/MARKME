@@ -1,8 +1,6 @@
 let verifiedStudent = null; // stores student info after step 1
 
-// ─────────────────────────────────────────────
 // Step 1 — Verify roll number + email
-// ─────────────────────────────────────────────
 async function verifyRollNo() {
   const rollNo = document.getElementById('roll-no').value.trim();
   const email  = document.getElementById('email').value.trim();
@@ -43,9 +41,7 @@ async function verifyRollNo() {
   }
 }
 
-// ─────────────────────────────────────────────
 // Step 2 — Set password
-// ─────────────────────────────────────────────
 async function handleSignup() {
   const password = document.getElementById('new-password').value;
   const confirm  = document.getElementById('confirm-password').value;
@@ -99,9 +95,7 @@ async function handleSignup() {
   }
 }
 
-// ─────────────────────────────────────────────
 // Step navigation
-// ─────────────────────────────────────────────
 function goToStep2() {
   document.getElementById('step-1').classList.add('hidden');
   document.getElementById('step-2').classList.remove('hidden');
