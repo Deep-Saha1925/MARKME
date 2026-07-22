@@ -7,7 +7,9 @@ A QR-based attendance system for colleges. Teachers generate a QR code at the st
 ## What it does
 
 - **Admins** manage students, teachers, and courses from a web dashboard — including bulk import via CSV or Excel
-- **Teachers** log in, generate a time-limited QR code for their class session, display it on a projector, share it via link or image, and export attendance as CSV or print it
+- **Teachers** log in, generate a time-limited QR code for their class session, display it on a projector, share it via link or image, and export attendance as CSV, Excel, or a printed report
+- Teachers can also browse a **Recent classes** history of past sessions and reopen any of them to see who attended
+- If a teacher is accidentally logged out (or refreshes) while a QR session is still live, logging back in **automatically resumes that same session** — no need to regenerate the QR
 - **Students** scan the QR via camera or upload a QR image (like UPI), with GPS verification to confirm physical presence
 - Attendance records are stored in a database with full history, per-course percentage tracking, and colour-coded alerts
 
@@ -24,7 +26,7 @@ A QR-based attendance system for colleges. Teachers generate a QR code at the st
 | Auth | JWT (JSON Web Tokens) |
 | QR generation | `qrcode` npm package |
 | QR scanning | `html5-qrcode` (camera + image upload) |
-| Excel parsing | SheetJS (`xlsx`) |
+| Excel import/export | SheetJS (`xlsx`) |
 
 ---
 
@@ -72,7 +74,7 @@ markme/
 ├── backend/
 │   ├── routes/
 │   │   ├── auth.js          → login, register, password change
-│   │   ├── sessions.js      → teacher creates QR, share endpoint
+│   │   ├── sessions.js      → teacher creates QR, session recovery, history, share endpoint
 │   │   ├── attendance.js    → student scans QR, history
 │   │   └── admin.js         → admin manage students/teachers/courses
 │   ├── middlewares/
@@ -86,7 +88,7 @@ markme/
 │   ├── pages/
 │   │   ├── login.html       → login for all roles
 │   │   ├── admin.html       → admin dashboard
-│   │   ├── dashboard.html   → teacher dashboard
+│   │   ├── dashboard.html   → teacher dashboard (QR, live attendance, recent classes)
 │   │   ├── attendance.html  → student scanner + history
 │   │   └── qr-share.html    → public QR share page
 │   └── js/
@@ -207,7 +209,8 @@ Open the `https://` URL on your phone — GPS will work normally. -->
 5. App fetches fresh GPS coordinates at scan time
 6. Token + GPS sent to server — validated for expiry, duplicate scan, geo-fence distance, and device ID
 7. Attendance recorded in Neon PostgreSQL
-8. Teacher sees live attendance, can export as CSV or print a formatted report
+8. Teacher sees live attendance, can export as CSV, Excel, or print a formatted report
+9. If the teacher logs out or the page is refreshed while the session is still live, logging back in reloads the same QR, timer, and live attendance feed automatically
 
 ---
 
@@ -221,6 +224,7 @@ Open the `https://` URL on your phone — GPS will work normally. -->
 - Two-layer geo validation — frontend blocks before server, server validates independently
 - Passwords are hashed with bcrypt
 - All routes are protected with JWT
+- A session's attendance list can only be viewed by the teacher who owns that session — verified server-side, not just hidden in the UI
 - HTTPS required for GPS — plain HTTP shows a clear warning
 
 ---
@@ -240,9 +244,11 @@ Open the `https://` URL on your phone — GPS will work normally. -->
 - Generate QR code per session with configurable expiry and geo-fence radius
 - Display QR on projector, download as PNG, or share via link
 - View live attendance as students scan
-- Export attendance as CSV (Roll No, Name, Time, Status)
-- Print a formatted attendance report
+- Export attendance as CSV or Excel (.xlsx), or print a formatted report
 - Session close button to stop scanning early
+- **Recent classes** panel listing past sessions with present-count and status (active / expired / closed)
+- Click any past class to open its full student list, with the same CSV / Excel / Print export options
+- **Automatic session recovery** — if logged out or the tab refreshes mid-class, logging back in restores the still-live QR session instead of starting over
 
 ### Student
 - Scan QR via phone camera
@@ -267,7 +273,9 @@ Open the `https://` URL on your phone — GPS will work normally. -->
 | `GET`  | `/api/auth/me` | Any | Get own profile |
 | `POST` | `/api/sessions/generate` | Teacher | Generate QR session |
 | `GET`  | `/api/sessions/my-courses` | Teacher | List assigned courses |
-| `GET`  | `/api/sessions/:id/attendance` | Teacher | Live attendance list |
+| `GET`  | `/api/sessions/my-active` | Teacher | Recover a still-live session after logout/refresh |
+| `GET`  | `/api/sessions/history` | Teacher | Recent classes with present-count and status |
+| `GET`  | `/api/sessions/:id/attendance` | Teacher | Attendance list for a session (live or past); scoped to the owning teacher |
 | `PATCH`| `/api/sessions/:id/close` | Teacher | Close session |
 | `GET`  | `/api/sessions/:id/share` | Public | Share page data |
 | `POST` | `/api/attendance/scan` | Student | Submit scan |
@@ -303,6 +311,10 @@ Open the `https://` URL on your phone — GPS will work normally. -->
 - [x] Change password from profile
 - [x] Export attendance as CSV
 - [x] Print attendance report
+- [x] Recent classes history for teachers, with per-session present-count and status
+- [x] Clickable class history — view the full student list for any past session
+- [x] Export attendance as Excel (.xlsx)
+- [x] Automatic session recovery after accidental teacher logout
 - [ ] Email notifications for low attendance
 - [ ] Admin attendance reports across all sessions
 - [ ] Deployment (Railway + Vercel)
