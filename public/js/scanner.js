@@ -438,9 +438,7 @@ async function loadCourses() {
   document.getElementById('profile-courses').innerHTML = html;
 }
 
-// ─────────────────────────────────────────────
 // HISTORY
-// ─────────────────────────────────────────────
 async function loadHistory() {
   const res  = await apiFetch('/api/attendance/detailed-history');
   const data = await res.json();
@@ -470,9 +468,7 @@ function filterHistory(type, btn) {
   renderHistory(type === 'all' ? allHistory : allHistory.filter(r => r.status === type));
 }
 
-// ─────────────────────────────────────────────
 // CHANGE PASSWORD
-// ─────────────────────────────────────────────
 async function changePassword() {
   const current = document.getElementById('pwd-current').value;
   const newPwd  = document.getElementById('pwd-new').value;
@@ -506,9 +502,7 @@ function showPwdMsg(type, text) {
   el.textContent = text;
 }
 
-// ─────────────────────────────────────────────
 // HELPERS
-// ─────────────────────────────────────────────
 function apiFetch(url, options = {}) {
   return fetch(url, {
     ...options,
