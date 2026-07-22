@@ -5,7 +5,6 @@ async function handleLogin() {
   const errorBox = document.getElementById('error-msg');
   const btn      = document.getElementById('login-btn');
 
-  // Basic validation
   if (!email || !password) {
     showError('Please fill in all fields');
     return;
@@ -55,7 +54,6 @@ function showError(msg) {
   box.classList.remove('hidden');
 }
 
-// Allow Enter key to submit
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleLogin();
 });
