@@ -313,9 +313,7 @@ async function onScanSuccess(decodedText) {
   await submitScan(decodedText, 'camera');
 }
 
-// ─────────────────────────────────────────────
 // UPLOAD QR IMAGE
-// ─────────────────────────────────────────────
 function handleUploadDragOver(e) {
   e.preventDefault();
   document.getElementById('upload-zone').classList.add('drag-over');
@@ -360,9 +358,7 @@ async function processUploadedQR(file) {
   }
 }
 
-// ─────────────────────────────────────────────
 // SCAN AGAIN
-// ─────────────────────────────────────────────
 function scanAgain() {
   scanning = false;
   window._lastLocation = null;
@@ -374,9 +370,7 @@ function scanAgain() {
   setStatus('', '');
 }
 
-// ─────────────────────────────────────────────
 // TAB SWITCHING
-// ─────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
@@ -390,9 +384,7 @@ function switchTab(name) {
   }
 }
 
-// ─────────────────────────────────────────────
 // PROFILE
-// ─────────────────────────────────────────────
 async function loadProfile() {
   const res  = await apiFetch('/api/auth/me');
   const data = await res.json();
@@ -414,9 +406,7 @@ async function loadProfile() {
   `;
 }
 
-// ─────────────────────────────────────────────
 // COURSES + STATS
-// ─────────────────────────────────────────────
 async function loadCourses() {
   const res  = await apiFetch('/api/attendance/history');
   const data = await res.json();
