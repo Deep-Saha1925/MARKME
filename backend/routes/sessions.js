@@ -82,9 +82,19 @@ router.get('/my-courses', authMiddleware, async (req, res) => {
   }
 });
 
-// GET /api/sessions/:id/attendance  — live attendance for a session
+// GET /api/sessions/:id/attendance  — attendance for a session (live or past)
 router.get('/:id/attendance', authMiddleware, async (req, res) => {
   try {
+    // Confirm this session actually belongs to the requesting teacher
+    // before returning any student records for it.
+    const owned = await sql`
+      SELECT id FROM sessions
+      WHERE id = ${req.params.id} AND teacher_id = ${req.user.id}
+    `;
+    if (!owned.length) {
+      return res.status(403).json({ error: 'Session not found or not yours' });
+    }
+
     const records = await sql`
       SELECT
         a.id, a.scanned_at, a.status,
