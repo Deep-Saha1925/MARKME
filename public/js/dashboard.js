@@ -15,12 +15,28 @@ let sessionCourseName  = '';
 let sessionDate        = '';
 let locationPending    = false;   // true while GPS request is in-flight
 
+// State for whichever past session is open in the "Recent classes" modal
+let historyModal = { data: [], meta: {} };
+
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   loadCourses();
   loadHistory();
+
+  // Click on any history row (event delegation — rows are re-rendered
+  // each time loadHistory() runs, so we bind once on the container).
+  document.getElementById('history-list').addEventListener('click', (e) => {
+    const row = e.target.closest('.history-row');
+    if (!row) return;
+    openHistoryDetail(
+      row.dataset.id,
+      `${row.dataset.course} (${row.dataset.code})`,
+      formatHistoryDate(row.dataset.createdAt),
+      row.dataset.status
+    );
+  });
 
   // If a session is still live from before (e.g. teacher got logged out
   // or refreshed mid-class), restore it first. Only request GPS for a
@@ -110,9 +126,14 @@ async function loadHistory() {
     }
 
     list.innerHTML = data.map(s => `
-      <div class="history-row">
+      <div class="history-row"
+           data-id="${s.id}"
+           data-course="${escapeAttr(s.course_name)}"
+           data-code="${escapeAttr(s.course_code)}"
+           data-created-at="${s.created_at}"
+           data-status="${s.status}">
         <div>
-          <div class="history-course">${s.course_name} (${s.course_code})</div>
+          <div class="history-course">${escapeHtml(s.course_name)} (${escapeHtml(s.course_code)})</div>
           <div class="history-meta">${formatHistoryDate(s.created_at)}</div>
         </div>
         <div class="history-right">
@@ -132,6 +153,75 @@ function formatHistoryDate(iso) {
     weekday: 'short', day: 'numeric', month: 'short',
     hour: '2-digit', minute: '2-digit'
   });
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function escapeAttr(str) {
+  return escapeHtml(str).replace(/"/g, '&quot;');
+}
+
+// ─────────────────────────────────────────────
+// HISTORY DETAIL MODAL (view students for a past class)
+// ─────────────────────────────────────────────
+async function openHistoryDetail(sessionId, courseLabel, dateLabel, status) {
+  document.getElementById('history-modal-course').textContent = courseLabel;
+  document.getElementById('history-modal-date').textContent   = dateLabel;
+  const statusEl = document.getElementById('history-modal-status');
+  statusEl.textContent = status;
+  statusEl.className   = `status-badge status-${status}`;
+  document.getElementById('history-modal-count').textContent  = '… present';
+  document.getElementById('history-modal-list').innerHTML =
+    '<p style="color:#73726c;font-size:14px">Loading…</p>';
+  document.getElementById('history-modal').classList.remove('hidden');
+
+  try {
+    const res  = await apiFetch(`/api/sessions/${sessionId}/attendance`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      document.getElementById('history-modal-list').innerHTML =
+        `<p style="color:#791F1F;font-size:14px">${data.error || 'Could not load attendance.'}</p>`;
+      return;
+    }
+
+    historyModal = {
+      data,
+      meta: { courseLabel, dateLabel, sessionId },
+    };
+    renderHistoryModalList(data);
+  } catch (err) {
+    console.error('[openHistoryDetail]', err);
+    document.getElementById('history-modal-list').innerHTML =
+      '<p style="color:#791F1F;font-size:14px">Could not load attendance.</p>';
+  }
+}
+
+function renderHistoryModalList(data) {
+  document.getElementById('history-modal-count').textContent = `${data.length} present`;
+  const list = document.getElementById('history-modal-list');
+
+  if (!data.length) {
+    list.innerHTML = '<p style="color:#73726c;font-size:14px">No students were marked present for this class.</p>';
+    return;
+  }
+
+  list.innerHTML = data.map(r => `
+    <div class="attendance-row">
+      <div>
+        <span class="roll-no">${escapeHtml(r.roll_no)}</span>
+        <span class="student-name">${escapeHtml(r.student_name)}</span>
+      </div>
+      <span class="scan-time">${formatTime(r.scanned_at)}</span>
+    </div>`).join('');
+}
+
+function closeHistoryModal() {
+  document.getElementById('history-modal').classList.add('hidden');
 }
 
 // ─────────────────────────────────────────────
@@ -369,18 +459,29 @@ async function fetchAttendance() {
 // ─────────────────────────────────────────────
 // EXPORT CSV
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// EXPORT CSV
+// ─────────────────────────────────────────────
 function exportCSV() {
-  if (!attendanceData.length) { alert('No attendance data to export yet.'); return; }
+  downloadCSV(attendanceData, { courseLabel: sessionCourseName, dateLabel: sessionDate });
+}
+
+function exportHistoryCSV() {
+  downloadCSV(historyModal.data, historyModal.meta);
+}
+
+function downloadCSV(data, meta) {
+  if (!data.length) { alert('No attendance data to export yet.'); return; }
 
   const header  = 'Roll No,Name,Time,Status';
-  const rows    = attendanceData.map(r =>
+  const rows    = data.map(r =>
     `${r.roll_no},"${r.student_name}",${formatTime(r.scanned_at)},Present`
   );
   const summary = [
     '',
-    `Course,${sessionCourseName}`,
-    `Date,${sessionDate}`,
-    `Total Present,${attendanceData.length}`,
+    `Course,${meta.courseLabel}`,
+    `Date,${meta.dateLabel}`,
+    `Total Present,${data.length}`,
     `Exported by,${user.name || 'Teacher'}`,
     `Exported at,${new Date().toLocaleString('en-IN')}`,
   ];
@@ -388,7 +489,7 @@ function exportCSV() {
   const blob       = new Blob([[header, ...rows, ...summary].join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url        = URL.createObjectURL(blob);
   const link       = document.createElement('a');
-  const courseSafe = sessionCourseName.replace(/[^a-zA-Z0-9]/g, '-');
+  const courseSafe = meta.courseLabel.replace(/[^a-zA-Z0-9]/g, '-');
   const dateSafe   = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');
   link.href        = url;
   link.download    = `MarkMe-${courseSafe}-${dateSafe}.csv`;
@@ -397,12 +498,53 @@ function exportCSV() {
 }
 
 // ─────────────────────────────────────────────
+// EXPORT EXCEL (.xlsx via SheetJS, same library used for admin bulk import)
+// ─────────────────────────────────────────────
+function exportExcel() {
+  downloadExcel(attendanceData, { courseLabel: sessionCourseName, dateLabel: sessionDate });
+}
+
+function exportHistoryExcel() {
+  downloadExcel(historyModal.data, historyModal.meta);
+}
+
+function downloadExcel(data, meta) {
+  if (!data.length) { alert('No attendance data to export yet.'); return; }
+  if (typeof XLSX === 'undefined') { alert('Excel export library failed to load — check your connection.'); return; }
+
+  const rows = data.map(r => ({
+    'Roll No': r.roll_no,
+    'Name':    r.student_name,
+    'Time':    formatTime(r.scanned_at),
+    'Status':  'Present',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{ wch: 12 }, { wch: 26 }, { wch: 12 }, { wch: 10 }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+
+  const courseSafe = meta.courseLabel.replace(/[^a-zA-Z0-9]/g, '-');
+  const dateSafe    = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');
+  XLSX.writeFile(wb, `MarkMe-${courseSafe}-${dateSafe}.xlsx`);
+}
+
+// ─────────────────────────────────────────────
 // PRINT ATTENDANCE
 // ─────────────────────────────────────────────
 function printAttendance() {
-  if (!attendanceData.length) { alert('No attendance data to print yet.'); return; }
+  printRows(attendanceData, { courseLabel: sessionCourseName, dateLabel: sessionDate });
+}
 
-  const rows = attendanceData.map((r, i) => `
+function printHistoryAttendance() {
+  printRows(historyModal.data, historyModal.meta);
+}
+
+function printRows(data, meta) {
+  if (!data.length) { alert('No attendance data to print yet.'); return; }
+
+  const rows = data.map((r, i) => `
     <tr>
       <td>${i + 1}</td>
       <td>${r.roll_no}</td>
@@ -439,12 +581,12 @@ function printAttendance() {
         <div class="logo"><span>Mark</span>Me</div>
         <div class="meta">
           Printed by: ${user.name || 'Teacher'}<br>
-          Date: ${sessionDate}<br>
+          Date: ${meta.dateLabel}<br>
           Printed at: ${new Date().toLocaleTimeString('en-IN')}
         </div>
       </div>
-      <h2>${sessionCourseName}</h2>
-      <p class="sub">Attendance Report · ${sessionDate}</p>
+      <h2>${meta.courseLabel}</h2>
+      <p class="sub">Attendance Report · ${meta.dateLabel}</p>
       <table>
         <thead>
           <tr><th>#</th><th>Roll No</th><th>Name</th><th>Scan Time</th><th>Status</th></tr>
@@ -452,9 +594,9 @@ function printAttendance() {
         <tbody>${rows}</tbody>
       </table>
       <div class="summary">
-        <div><strong>Total present</strong>${attendanceData.length}</div>
-        <div><strong>Course</strong>${sessionCourseName}</div>
-        <div><strong>Date</strong>${sessionDate}</div>
+        <div><strong>Total present</strong>${data.length}</div>
+        <div><strong>Course</strong>${meta.courseLabel}</div>
+        <div><strong>Date</strong>${meta.dateLabel}</div>
       </div>
       <div class="footer">Generated by MarkMe · QR Attendance System</div>
       <script>window.onload = () => { window.print(); }<\/script>
