@@ -141,9 +141,7 @@ function setActiveStep(n) {
   });
 }
 
-// ─────────────────────────────────────────────
 // Password strength checker
-// ─────────────────────────────────────────────
 function checkStrength(val) {
   const bar   = document.getElementById('strength-bar');
   const label = document.getElementById('strength-label');
@@ -178,9 +176,7 @@ function setRule(id, passed) {
   el.classList.toggle('rule-fail', !passed);
 }
 
-// ─────────────────────────────────────────────
 // Message helpers
-// ─────────────────────────────────────────────
 function showError(msg) {
   const el = document.getElementById('error-msg');
   el.textContent = msg;
