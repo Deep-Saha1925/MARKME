@@ -606,9 +606,7 @@ function printRows(data, meta) {
   printWindow.document.close();
 }
 
-// ─────────────────────────────────────────────
 // CLOSE SESSION
-// ─────────────────────────────────────────────
 async function closeSession() {
   if (!confirm('Close this session? Students will no longer be able to scan.')) return;
   await apiFetch(`/api/sessions/${currentSessionId}/close`, { method: 'PATCH' });
@@ -622,9 +620,7 @@ async function closeSession() {
   loadHistory();
 }
 
-// ─────────────────────────────────────────────
 // BACK TO HOME
-// ─────────────────────────────────────────────
 function backToHome() {
   if (currentSessionId && !sessionClosed) {
     if (!confirm('An active session is still running.\nStudents can still scan until it expires.\nGo back anyway?')) return;
@@ -651,9 +647,7 @@ function backToHome() {
   getLocation();
 }
 
-// ─────────────────────────────────────────────
 // DOWNLOAD QR
-// ─────────────────────────────────────────────
 function downloadQR() {
   const img    = document.getElementById('qr-image');
   const canvas = document.createElement('canvas');
@@ -671,9 +665,7 @@ function downloadQR() {
   image.src = img.src;
 }
 
-// ─────────────────────────────────────────────
 // SHARE LINK
-// ─────────────────────────────────────────────
 function shareLink() {
   const url = `${window.location.origin}/pages/qr-share.html?session=${currentSessionId}`;
   const btn = document.getElementById('share-btn');
@@ -696,9 +688,7 @@ function copyLink(url, btn) {
   });
 }
 
-// ─────────────────────────────────────────────
 // HELPERS
-// ─────────────────────────────────────────────
 function apiFetch(url, options = {}) {
   return fetch(url, {
     ...options,
