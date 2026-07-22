@@ -162,9 +162,7 @@ function warmUpGPS() {
   });
 }
 
-// ─────────────────────────────────────────────
 // LOCATION BANNER
-// ─────────────────────────────────────────────
 function showLocBanner(type, msg) {
   const el = document.getElementById('loc-banner');
   el.className   = 'loc-banner ' + type;
@@ -175,9 +173,7 @@ function hideLocBanner() {
   document.getElementById('loc-banner').classList.add('hidden');
 }
 
-// ─────────────────────────────────────────────
 // GET FRESH GPS
-// ─────────────────────────────────────────────
 function getCurrentLocation() {
   return new Promise(resolve => {
     if (!navigator.geolocation) {
@@ -225,9 +221,7 @@ async function retryLocation() {
   window._lastLocation = await getCurrentLocation();
 }
 
-// ─────────────────────────────────────────────
 // SUBMIT SCAN — shared by camera + upload
-// ─────────────────────────────────────────────
 async function submitScan(decodedText, method) {
   let location = window._lastLocation || null;
   window._lastLocation = null;
@@ -280,9 +274,7 @@ async function submitScan(decodedText, method) {
   }
 }
 
-// ─────────────────────────────────────────────
 // CAMERA SCANNER
-// ─────────────────────────────────────────────
 function startScanner() {
   hideLocBanner();
   document.getElementById('retry-loc-btn').classList.add('hidden');
