@@ -367,7 +367,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
 .banner-label { color: #73726c; }
 .banner-value { font-weight: 500; }
 
-/* ── Password strength ── */
 .strength-bar-bg {
   background: #e0dfd8;
   border-radius: 4px;
@@ -387,7 +386,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
   min-height: 18px;
 }
 
-/* ── Password rules ── */
 .password-rules {
   list-style: none;
   font-size: 12px;
