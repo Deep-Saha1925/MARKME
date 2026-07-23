@@ -256,7 +256,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
   white-space: nowrap;
 }
 
-/* ── Auth extras ── */
 .auth-divider {
   display: flex;
   align-items: center;
