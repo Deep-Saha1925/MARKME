@@ -349,7 +349,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
   margin-bottom: 18px;
 }
 
-/* ── Student info banner ── */
 .student-banner {
   background: #f4f4f0;
   border: 1px solid #e0dfd8;
