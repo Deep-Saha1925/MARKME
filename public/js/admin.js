@@ -335,9 +335,7 @@ async function deleteCourse(id, name) {
   loadCourses();
 }
 
-// ─────────────────────────────────────────────
 // BULK IMPORT
-// ─────────────────────────────────────────────
 let importType = 'students';
 let importRows = [];
 
