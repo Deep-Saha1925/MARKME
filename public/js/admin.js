@@ -525,9 +525,7 @@ async function runImport() {
   if (importType === 'courses')  loadCourses();
 }
 
-// ─────────────────────────────────────────────
 // HELPERS
-// ─────────────────────────────────────────────
 function showMsg(id, type, text) {
   const el = document.getElementById(id);
   if (!el) return;
