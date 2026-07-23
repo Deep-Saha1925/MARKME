@@ -144,7 +144,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
 .geo-ok   { color: #0F6E56; }
 .geo-warn { color: #854F0B; }
 
-/* ── QR layout ── */
 .qr-layout { display: flex; gap: 32px; flex-wrap: wrap; }
 .qr-left  { display: flex; flex-direction: column; align-items: center;
              min-width: 260px; flex: 1; }
