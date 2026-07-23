@@ -210,7 +210,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
 }
 .btn-ghost-full:hover { background: #f4f4f0; }
 
-/* ── Success screen ── */
 .success-icon {
   width: 64px; height: 64px;
   background: #E1F5EE;
