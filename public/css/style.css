@@ -301,7 +301,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
   margin-top: 2px;
 }
 
-/* ── Step indicators ── */
 .steps {
   display: flex;
   align-items: center;
