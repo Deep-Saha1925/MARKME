@@ -288,9 +288,7 @@ async function deleteTeacher(id, name) {
   loadTeachers();
 }
 
-// ─────────────────────────────────────────────
 // COURSES
-// ─────────────────────────────────────────────
 async function loadTeachersDropdown() {
   const { ok, data } = await api('/api/admin/teachers');
   const sel = document.getElementById('c-teacher');
