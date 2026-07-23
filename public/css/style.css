@@ -223,7 +223,6 @@ button:disabled { background: #9c9a92; cursor: not-allowed; }
   margin: 0 auto 18px;
 }
 
-/* ── History ── */
 .history-row {
   display: flex;
   justify-content: space-between;
