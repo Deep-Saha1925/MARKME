@@ -2,66 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <title>MarkMe — Admin</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f4f4f0; color: #1a1a18; min-height: 100vh; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: system-ui, sans-serif; background: #f4f4f0; color: #1a1a18; min-height: 100vh; overflow-x: hidden; }
 
     /* ── Navbar ── */
-    .navbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: #fff; border-bottom: 1px solid #e0dfd8; }
-    .nav-logo { display: flex; align-items: center; gap: 8px; }
-    .logo-mark { width: 32px; height: 32px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    .logo-text { font-size: 18px; font-weight: 600; }
-    .nav-badge { font-size: 11px; background: #EEEDF8; color: #534AB7; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
-    .nav-right { display: flex; align-items: center; gap: 12px; }
-    .nav-user  { font-size: 14px; color: #73726c; }
-    .btn-signout { padding: 7px 14px; font-size: 13px; cursor: pointer; background: none; border: 1px solid #d3d1c7; border-radius: 8px; color: #3d3d3a; }
+    .navbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e0dfd8; position: sticky; top: 0; z-index: 40; gap: 8px; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .logo-mark { width: 32px; height: 32px; background: #534AB7; color: #fff; border-radius: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .logo-text { font-size: 18px; font-weight: 600; white-space: nowrap; }
+    .nav-badge { font-size: 11px; background: #EEEDF8; color: #534AB7; padding: 2px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .nav-user  { font-size: 14px; color: #73726c; white-space: nowrap; }
+    .btn-signout { padding: 7px 14px; font-size: 13px; cursor: pointer; background: none; border: 1px solid #d3d1c7; border-radius: 8px; color: #3d3d3a; white-space: nowrap; }
     .btn-signout:hover { background: #f4f4f0; }
 
+    /* Hamburger — hidden on desktop */
+    .menu-toggle { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; background: none; border: 1px solid #d3d1c7; border-radius: 8px; cursor: pointer; font-size: 16px; flex-shrink: 0; }
+    .menu-toggle:hover { background: #f4f4f0; }
+
     /* ── Sidebar + Content layout ── */
-    .layout { display: flex; min-height: calc(100vh - 57px); }
+    .layout { display: flex; min-height: calc(100vh - 57px); position: relative; }
     .sidebar { width: 220px; background: #fff; border-right: 1px solid #e0dfd8; padding: 20px 12px; flex-shrink: 0; }
     .sidebar-label { font-size: 11px; font-weight: 600; color: #9c9a92; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 10px; margin-bottom: 6px; margin-top: 16px; }
     .sidebar-label:first-child { margin-top: 0; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: #3d3d3a; border: none; background: none; width: 100%; text-align: left; transition: background 0.12s; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: #3d3d3a; border: none; background: none; width: 100%; text-align: left; transition: background 0.12s; }
     .nav-item:hover  { background: #f4f4f0; }
     .nav-item.active { background: #EEEDF8; color: #534AB7; }
-    .nav-item .icon  { font-size: 16px; width: 20px; text-align: center; }
+    .nav-item .icon  { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
     .nav-badge-count { margin-left: auto; font-size: 11px; background: #534AB7; color: #fff; padding: 1px 7px; border-radius: 20px; }
 
+    /* Overlay behind mobile drawer */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 45; }
+
     /* ── Main content ── */
-    .content { flex: 1; padding: 28px; overflow-y: auto; }
+    .content { flex: 1; padding: 24px; overflow-y: auto; min-width: 0; }
     .hidden { display: none !important; }
 
     /* ── Page header ── */
-    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .page-title  { font-size: 20px; font-weight: 600; }
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+    .page-title  { font-size: 19px; font-weight: 600; }
     .page-sub    { font-size: 13px; color: #73726c; margin-top: 2px; }
 
     /* ── Stats ── */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
-    .stat-card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 16px 20px; }
-    .stat-num   { font-size: 26px; font-weight: 600; color: #534AB7; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
+    .stat-card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 16px 18px; min-width: 0; }
+    .stat-num   { font-size: 24px; font-weight: 600; color: #534AB7; word-break: break-word; }
     .stat-label { font-size: 12px; color: #73726c; margin-top: 2px; }
 
     /* ── Card ── */
-    .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 22px; margin-bottom: 20px; }
+    .card { background: #fff; border: 1px solid #e0dfd8; border-radius: 12px; padding: 18px; margin-bottom: 20px; min-width: 0; }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
     .card-title  { font-size: 15px; font-weight: 600; }
 
     /* ── Toolbar ── */
-    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .search-box { position: relative; }
-    .search-box input { padding: 8px 12px 8px 32px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; width: 220px; outline: none; background: #fafaf8; }
+    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%; }
+    .search-box { position: relative; flex: 1 1 180px; min-width: 140px; }
+    .search-box input { padding: 8px 12px 8px 32px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; width: 100%; outline: none; background: #fafaf8; }
     .search-box input:focus { border-color: #534AB7; background: #fff; }
     .search-box::before { content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; }
-    .select-sm { padding: 8px 10px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; background: #fafaf8; outline: none; cursor: pointer; }
+    .select-sm { padding: 8px 10px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; background: #fafaf8; outline: none; cursor: pointer; flex: 0 1 auto; }
     .select-sm:focus { border-color: #534AB7; }
 
     /* ── Table ── */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px; }
     th { text-align: left; padding: 10px 12px; color: #73726c; font-weight: 500; border-bottom: 1px solid #e0dfd8; white-space: nowrap; user-select: none; }
     th.sortable { cursor: pointer; }
     th.sortable:hover { color: #1a1a18; }
@@ -76,7 +84,7 @@
     /* ── Pagination ── */
     .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 10px; }
     .pagination-info { font-size: 13px; color: #73726c; }
-    .pagination-btns { display: flex; gap: 4px; }
+    .pagination-btns { display: flex; gap: 4px; flex-wrap: wrap; }
     .pg-btn { padding: 6px 10px; font-size: 13px; border: 1px solid #d3d1c7; background: #fff; border-radius: 6px; cursor: pointer; min-width: 34px; text-align: center; }
     .pg-btn:hover:not(:disabled) { background: #EEEDF8; border-color: #534AB7; color: #534AB7; }
     .pg-btn.active { background: #534AB7; color: #fff; border-color: #534AB7; }
@@ -84,15 +92,14 @@
 
     /* ── Badges ── */
     .roll-tag { background: #EEEDF8; color: #534AB7; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; font-family: monospace; }
-    .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
     .badge-green  { background: #E1F5EE; color: #0F6E56; }
     .badge-yellow { background: #FAEEDA; color: #854F0B; }
     .badge-blue   { background: #E0EDFB; color: #185FA5; }
 
     /* ── Form ── */
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } .stats-row { grid-template-columns: 1fr 1fr; } }
-    .field { margin-bottom: 14px; }
+    .field { margin-bottom: 14px; min-width: 0; }
     .field label { display: block; font-size: 13px; font-weight: 500; color: #3d3d3a; margin-bottom: 5px; }
     .field input, .field select, .field textarea { width: 100%; padding: 9px 12px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 14px; background: #fafaf8; outline: none; font-family: inherit; transition: border-color 0.15s; }
     .field input:focus, .field select:focus, .field textarea:focus { border-color: #534AB7; background: #fff; }
@@ -104,7 +111,7 @@
     .btn-primary   { width: 100%; padding: 10px; font-size: 14px; font-weight: 500; background: #534AB7; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
     .btn-primary:hover    { background: #3C3489; }
     .btn-primary:disabled { background: #9c9a92; cursor: not-allowed; }
-    .btn-secondary { padding: 9px 16px; font-size: 13px; font-weight: 500; background: #EEEDF8; color: #534AB7; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-secondary { padding: 9px 16px; font-size: 13px; font-weight: 500; background: #EEEDF8; color: #534AB7; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; }
     .btn-secondary:hover { background: #DDD9F3; }
     .btn-sm { padding: 5px 12px; font-size: 12px; font-weight: 500; border: none; border-radius: 6px; cursor: pointer; }
     .btn-sm-danger { background: #FCEBEB; color: #791F1F; }
@@ -122,20 +129,20 @@
     .toggle-btn:not(.active):hover { background: #f4f4f0; }
 
     /* ── Drop zone ── */
-    .drop-zone { border: 2px dashed #d3d1c7; border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 14px; background: #fafaf8; }
+    .drop-zone { border: 2px dashed #d3d1c7; border-radius: 10px; padding: 22px 16px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 14px; background: #fafaf8; }
     .drop-zone:hover, .drop-zone.drag-over { border-color: #534AB7; background: #EEEDF8; }
     .drop-zone input[type="file"] { display: none; }
     .drop-icon { font-size: 24px; margin-bottom: 6px; }
     .drop-label { font-size: 13px; font-weight: 500; color: #3d3d3a; margin-bottom: 3px; }
     .drop-hint  { font-size: 11px; color: #9c9a92; }
-    .drop-filename { font-size: 12px; color: #534AB7; font-weight: 500; margin-top: 6px; }
+    .drop-filename { font-size: 12px; color: #534AB7; font-weight: 500; margin-top: 6px; word-break: break-all; }
 
     /* ── CSV hint ── */
-    .csv-hint { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #534AB7; font-family: monospace; line-height: 1.9; }
-    .csv-hint-title { font-family: system-ui; font-weight: 600; color: #3d3d3a; margin-bottom: 4px; font-size: 12px; }
+    .csv-hint { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #534AB7; font-family: monospace; line-height: 1.9; overflow-x: auto; white-space: pre; }
+    .csv-hint-title { font-family: system-ui; font-weight: 600; color: #3d3d3a; margin-bottom: 4px; font-size: 12px; white-space: normal; }
 
     /* ── Preview ── */
-    .preview-box { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px; margin-bottom: 14px; max-height: 180px; overflow-y: auto; }
+    .preview-box { background: #f4f4f0; border: 1px solid #e0dfd8; border-radius: 8px; padding: 10px; margin-bottom: 14px; max-height: 180px; overflow-y: auto; overflow-x: auto; }
     .preview-title { font-size: 13px; font-weight: 500; color: #0F6E56; margin-bottom: 8px; }
     .preview-note  { font-size: 12px; color: #73726c; margin-top: 8px; }
 
@@ -143,21 +150,97 @@
     .list-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0efe8; }
     .list-item:last-child { border-bottom: none; }
     .avatar { width: 34px; height: 34px; border-radius: 50%; background: #EEEDF8; color: #534AB7; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .list-name   { font-size: 14px; font-weight: 500; }
-    .list-detail { font-size: 12px; color: #73726c; margin-top: 1px; }
+    .list-name   { font-size: 14px; font-weight: 500; word-break: break-word; }
+    .list-detail { font-size: 12px; color: #73726c; margin-top: 1px; word-break: break-word; }
 
     /* ── Empty state ── */
     .empty-state { text-align: center; padding: 40px 20px; color: #73726c; font-size: 14px; }
     .empty-icon  { font-size: 32px; margin-bottom: 10px; }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE BREAKPOINTS
+       ══════════════════════════════════════════ */
+
+    /* Tablet / small laptop: tighten spacing, keep sidebar */
+    @media (max-width: 1024px) {
+      .content { padding: 20px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .sidebar { width: 190px; }
+    }
+
+    /* Mobile: sidebar becomes an off-canvas drawer, forms stack */
+    @media (max-width: 800px) {
+      .menu-toggle { display: flex; }
+      .nav-user { display: none; }
+
+      .layout { position: relative; }
+
+      .sidebar {
+        position: fixed;
+        top: 0; left: 0;
+        height: 100%;
+        width: 240px;
+        max-width: 78vw;
+        z-index: 50;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+        overflow-y: auto;
+        padding-top: 64px;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+
+      .content { padding: 16px; width: 100%; }
+
+      .two-col { grid-template-columns: 1fr; gap: 0; }
+      .row-3 { grid-template-columns: 1fr; gap: 0; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+      .page-header { flex-direction: column; align-items: stretch; }
+      .page-header .btn-secondary { width: 100%; text-align: center; }
+
+      .card { padding: 16px; }
+      .card-header { flex-direction: column; align-items: stretch; }
+      .card-header .btn-secondary { width: 100%; text-align: center; }
+
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .search-box, .select-sm { width: 100%; flex: 1 1 auto; }
+
+      .btn-row { flex-direction: column; align-items: stretch; }
+      .btn-row .btn-primary, .btn-row .btn-secondary { width: 100%; text-align: center; }
+
+      #add-student-form .btn-primary { width: 100%; }
+
+      .pagination { flex-direction: column; align-items: stretch; }
+      .pagination-btns { justify-content: center; }
+    }
+
+    /* Small phones */
+    @media (max-width: 460px) {
+      .navbar { padding: 10px 12px; }
+      .logo-text { font-size: 16px; }
+      .nav-badge { display: none; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .stat-card { padding: 12px 14px; }
+      .stat-num { font-size: 20px; }
+      .page-title { font-size: 17px; }
+      table { min-width: 560px; }
+      .import-type-row { flex-direction: column; }
+      #page-import .btn-secondary { width: 100%; }
+    }
   </style>
 </head>
 <body>
 
   <nav class="navbar">
-    <div class="nav-logo">
-      <div class="logo-mark">M</div>
-      <span class="logo-text">MarkMe</span>
-      <span class="nav-badge">Admin</span>
+    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+      <button class="menu-toggle" id="menu-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+      <div class="nav-logo">
+        <div class="logo-mark">M</div>
+        <span class="logo-text">MarkMe</span>
+        <span class="nav-badge">Admin</span>
+      </div>
     </div>
     <div class="nav-right">
       <span id="admin-name" class="nav-user"></span>
@@ -167,8 +250,11 @@
 
   <div class="layout">
 
+    <!-- Overlay for mobile drawer -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
     <!-- ── Sidebar ── -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-label">Overview</div>
       <button class="nav-item active" onclick="showPage('dashboard', this)">
         <span class="icon">📊</span> Dashboard
@@ -371,7 +457,7 @@
           <div class="card-header" style="margin-bottom:0">
             <div class="card-title">What are you importing?</div>
           </div>
-          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+          <div class="import-type-row" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
             <button class="btn-secondary active-type" id="import-type-students" onclick="switchImportType('students')" style="border:2px solid #534AB7">🎓 Students</button>
             <button class="btn-secondary" id="import-type-teachers" onclick="switchImportType('teachers')" style="border:2px solid transparent">👨‍🏫 Teachers</button>
             <button class="btn-secondary" id="import-type-courses"  onclick="switchImportType('courses')"  style="border:2px solid transparent">📚 Courses</button>
@@ -426,6 +512,26 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    // ── Mobile sidebar drawer ──
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+    // Close drawer automatically after choosing a page on mobile
+    document.addEventListener('click', function (e) {
+      const item = e.target.closest('.nav-item');
+      if (item && window.innerWidth <= 800) closeSidebar();
+    });
+    // Keep drawer state sane on resize back to desktop
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 800) closeSidebar();
+    });
+  </script>
   <script src="../js/admin.js"></script>
 </body>
 </html>
