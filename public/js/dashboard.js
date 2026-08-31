@@ -175,6 +175,9 @@ async function openHistoryDetail(sessionId, courseLabel, dateLabel, status) {
   statusEl.textContent = status;
   statusEl.className   = `status-badge status-${status}`;
   document.getElementById('history-modal-count').textContent  = '… present';
+
+  // Only a still-live session can be resumed back into the QR view
+  document.getElementById('history-resume-btn').classList.toggle('hidden', status !== 'active');
   document.getElementById('history-modal-list').innerHTML =
     '<p style="color:#73726c;font-size:14px">Loading…</p>';
   document.getElementById('history-modal').classList.remove('hidden');
@@ -222,6 +225,25 @@ function renderHistoryModalList(data) {
 
 function closeHistoryModal() {
   document.getElementById('history-modal').classList.add('hidden');
+}
+
+// Bring a still-live session (opened from Recent classes) back into the
+// main QR view, exactly like the automatic resume-on-login does.
+async function resumeFromHistory() {
+  const targetId = historyModal.meta.sessionId;
+  closeHistoryModal();
+
+  const ok = await checkActiveSession();
+  if (!ok) {
+    alert('That session is no longer active — it may have expired.');
+    loadHistory();
+    return;
+  }
+  if (String(currentSessionId) !== String(targetId)) {
+    // Safety net: only relevant if a teacher somehow has more than one
+    // live session, since /my-active always returns the newest.
+    alert('Resumed your most recent live session (a newer one was found).');
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -363,6 +385,11 @@ async function generateQR() {
   btn.textContent = 'Generate QR code';
   btn.disabled    = false;
 
+  if (res.status === 409) {
+    alert((data.error || 'You already have a live session.') + '\n\nLoading it now instead.');
+    await checkActiveSession();
+    return;
+  }
   if (!res.ok) { alert(data.error || 'Failed to generate QR'); return; }
 
   currentSessionId  = data.session_id;

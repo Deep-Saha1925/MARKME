@@ -26,6 +26,24 @@ router.post('/generate', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Course not found or not yours' });
     }
 
+    // Refuse to spin up a second QR while one is still live — otherwise
+    // the old session keeps silently accepting scans with no UI pointing
+    // back at it (it becomes unreachable once "Back to home" is clicked,
+    // since /my-active only ever surfaces the single most recent one).
+    const now = new Date();
+    const stillActive = await sql`
+      SELECT id FROM sessions
+      WHERE teacher_id = ${req.user.id}
+        AND is_active  = true
+        AND expires_at > ${now}
+    `;
+    if (stillActive.length) {
+      return res.status(409).json({
+        error:      'You already have a live QR session. Resume or close it before starting a new one.',
+        session_id: stillActive[0].id,
+      });
+    }
+
     // Generate a unique token
     const token = crypto.randomUUID();
     const expiryMins = expiry_minutes || 10;
