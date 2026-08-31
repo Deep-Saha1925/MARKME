@@ -199,7 +199,7 @@ function getCurrentLocation() {
             : `⚠️ Low GPS accuracy (±${acc}m)`
         );
         if (acc > 50) document.getElementById('retry-loc-btn').classList.remove('hidden');
-        resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: acc });
       },
       err => {
         const msgs = {
@@ -209,7 +209,7 @@ function getCurrentLocation() {
         };
         showLocBanner('error', msgs[err.code] || '❌ Location error');
         document.getElementById('retry-loc-btn').classList.remove('hidden');
-        resolve({ lat: null, lng: null });
+        resolve({ lat: null, lng: null, accuracy: null });
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
     );
@@ -245,6 +245,7 @@ async function submitScan(decodedText, method) {
         device_id: deviceId,
         lat:       location.lat,
         lng:       location.lng,
+        accuracy:  location.accuracy,
       })
     });
     const data = await res.json();

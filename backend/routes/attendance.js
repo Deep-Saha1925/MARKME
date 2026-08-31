@@ -24,7 +24,7 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
 // POST /api/attendance/scan
 // ─────────────────────────────────────────────
 router.post('/scan', authMiddleware, async (req, res) => {
-  const { token, device_id, lat, lng } = req.body;
+  const { token, device_id, lat, lng, accuracy } = req.body;
   const studentId = req.user.id;
 
   if (!token) {
@@ -88,10 +88,29 @@ router.post('/scan', authMiddleware, async (req, res) => {
         parseFloat(lat),
         parseFloat(lng)
       );
-      console.log(`[geo] Student ${studentId} is ${Math.round(distance)}m from classroom (fence: ${session.fence_radius_m}m)`);
-      if (distance > session.fence_radius_m) {
+
+      // Raw distance-vs-radius ignores how imprecise either GPS reading
+      // is. Browser geolocation (especially on laptops without a GPS
+      // chip, or indoors) commonly reports accuracy in the tens to low
+      // hundreds of metres — the classroom fence is only 10-50m, so an
+      // honestly-present student can easily be reported just outside it.
+      // Widen the effective radius by the student's reported accuracy,
+      // capped so someone can't spoof presence by just claiming huge
+      // inaccuracy.
+      const MAX_ACCURACY_BONUS_M = 100;
+      const accuracyBonus = accuracy
+        ? Math.min(Math.max(parseFloat(accuracy), 0), MAX_ACCURACY_BONUS_M)
+        : 0;
+      const effectiveRadius = session.fence_radius_m + accuracyBonus;
+
+      console.log(`[geo] Student ${studentId} is ${Math.round(distance)}m from classroom ` +
+        `(fence: ${session.fence_radius_m}m, +${Math.round(accuracyBonus)}m accuracy margin, ` +
+        `effective: ${Math.round(effectiveRadius)}m)`);
+
+      if (distance > effectiveRadius) {
         return res.status(403).json({
-          error: `You are ${Math.round(distance)}m away from the classroom. Must be within ${session.fence_radius_m}m.`
+          error: `You are ${Math.round(distance)}m away from the classroom. Must be within ${session.fence_radius_m}m` +
+            (accuracyBonus ? ` (a ${Math.round(accuracyBonus)}m GPS accuracy margin was already applied).` : '.')
         });
       }
     }
