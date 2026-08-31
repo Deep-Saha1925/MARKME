@@ -78,8 +78,6 @@ router.post('/courses', async (req, res) => {
   }
 });
 
-module.exports = router;
-
 // DELETE /api/admin/students/:id
 router.delete('/students/:id', async (req, res) => {
   try {
@@ -109,3 +107,5 @@ router.delete('/courses/:id', async (req, res) => {
     res.status(500).json({ error: 'Could not remove course' });
   }
 });
+
+module.exports = router;

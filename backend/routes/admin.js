@@ -85,4 +85,37 @@ router.post('/courses', async (req, res) => {
   }
 });
 
+// Remove student
+router.delete('/students/:id', async (req, res) => {
+  try {
+    await sql`DELETE FROM students WHERE id = ${req.params.id}`;
+    res.json({ message: 'Student removed' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Could not remove student' });
+  }
+});
+
+// Remove teacher
+router.delete('/teachers/:id', async (req, res) => {
+  try {
+    await sql`DELETE FROM users WHERE id = ${req.params.id} AND role = 'teacher'`;
+    res.json({ message: 'Teacher removed' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Could not remove teacher' });
+  }
+});
+
+// Remove course
+router.delete('/courses/:id', async (req, res) => {
+  try {
+    await sql`DELETE FROM courses WHERE id = ${req.params.id}`;
+    res.json({ message: 'Course removed' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Could not remove course' });
+  }
+});
+
 module.exports = router;
